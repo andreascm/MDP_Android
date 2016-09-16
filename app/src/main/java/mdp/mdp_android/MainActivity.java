@@ -6,17 +6,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
-    // Message types sent from the BluetoothService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -27,25 +24,15 @@ public class MainActivity extends ActionBarActivity {
     public static final int DISPLAY_MOVEMENT_AND_STATUS = 8;
     public static final int STATUS_UPDATE = 9;
 
-    // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int CONFIG_SETTING = 3;
     private static final int CUSTOM_COMMAND = 4;
     private static final int LoadDefaultCoordinates = 5;
 
-    // Modes
-    private static final int MODE_EXPLORATION = 1;
-    private static final int MODE_RACE = 2;
-    private static final int MODE_MANUAL = 3;
-
-    // Name of the connected device
     private String deviceName = null;
-    // Array adapter for the conversation thread
     private ArrayAdapter<String> messageArrayAdapter;
-    // Local Bluetooth adapter
     private BluetoothAdapter bluetoothAdapter = null;
-    // Member object for the chat services
     private Bluetooth bluetooth = null;
 
     private boolean bluetoothConnection = false;
@@ -53,11 +40,14 @@ public class MainActivity extends ActionBarActivity {
 
     private String deviceAddress = null;
 
-    private Handler reconnectHandler; //For handling reconnection request.
+    private Handler reconnectHandler;
     private BluetoothDevice device;
 
     public int reconnectCount = 0;
-    public static boolean secureConnection; //Whether connection should be done in secure mode or not.
+    public static boolean secureConnection;
+
+    private Map map = new Map();
+    private Robot robot = new Robot();
 
     private Button mBluetoothButton;
     private Button mSendButton;
