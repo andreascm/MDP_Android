@@ -21,7 +21,7 @@ public class Map {
 
     public static void resetMap() {
         for (int i=0; i<MAP_WIDTH; i++) {
-            for (int j=0; i<MAP_LENGTH; i++) {
+            for (int j=0; j<MAP_LENGTH; j++) {
                 mapData[i][j] = 0;
             }
         }
