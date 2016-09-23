@@ -15,18 +15,26 @@ public class MapView extends View {
     private int numRow;
     private int cellWidth;
     private int cellHeight;
+    private int paintMode;
     private Paint paintDiscovered = new Paint();
     private Paint paintObstacle = new Paint();
-    private int[][] painted;
+    private Paint paintGrid = new Paint();
+    private int[][] painted = new int[15][20];
 
     public MapView(Context context) {
-        this(context, null);
+        this(context, 0);
     }
 
-    public MapView(Context context, AttributeSet attributes) {
-        super(context, attributes);
-        paintDiscovered.setStyle(Paint.Style.FILL_AND_STROKE);
-        paintObstacle.setStyle(Paint.Style.FILL_AND_STROKE);
+    public MapView(Context context, int mode) {
+        super(context);
+        paintMode = mode;
+        paintDiscovered.setColor(Color.YELLOW);
+        paintDiscovered.setStyle(Paint.Style.FILL);
+        paintObstacle.setColor(Color.BLACK);
+        paintObstacle.setStyle(Paint.Style.FILL);
+        paintGrid.setColor(Color.GRAY);
+        paintGrid.setStyle(Paint.Style.STROKE);
+        paintGrid.setStrokeWidth(2);
     }
 
     public void recalculateDimension() {
@@ -56,15 +64,20 @@ public class MapView extends View {
             return;
         }
 
+        if (paintMode == 0) {
+            painted = new int[15][20];
+        }
+
         int width = getWidth();
         int height = getHeight();
 
         for (int i=0; i<numRow; i++) {
             for(int j=0; j<numColumn; j++) {
+                canvas.drawRect(i*cellHeight, j*cellWidth, (i+1)*cellHeight, (j+1)*cellWidth, paintGrid);
                 if (painted[i][j] == 1) {
                     canvas.drawRect(i*cellHeight, j*cellWidth, (i+1)*cellHeight, (j+1)*cellWidth, paintDiscovered);
                 } else if (painted[i][j] == -1) {
-                    canvas.drawRect(i*cellHeight, j*cellWidth, (i+1)*cellHeight, (j+1)*cellWidth, paintDiscovered);
+                    canvas.drawRect(i*cellHeight, j*cellWidth, (i+1)*cellHeight, (j+1)*cellWidth, paintObstacle);
                 }
             }
         }
