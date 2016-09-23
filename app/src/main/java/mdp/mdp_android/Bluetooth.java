@@ -263,12 +263,10 @@ public class Bluetooth {
 
                     // Movement keywords
                     // Deciphers input and sends it to initiate robot movements
-                    if (key == 'b' || key == 'r' || key == 'l' || key == 'f') {
+                    if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f')) {
 
                         // Gets first 2 positions from buffer
-                        for (int x = 0; x < 1; x++) {
-                            received += (char) buffer[x];
-                        }
+                        received = String.valueOf(buffer).substring(0, 5);
 
                         // Displays feedback from robot returns after pressing
                         // keywords
@@ -278,46 +276,35 @@ public class Bluetooth {
 
                         // Reset grid
                         // Redisplay information of grid
+                    } else if (key == 'g') {
+
+                        // Combines into a string to form grid parameter
+                        received = String.valueOf(buffer).substring(0, 65);
+
+                        // Updates grid
+                        handler.obtainMessage(MainActivity.GRID_UPDATE, bytes,
+                                -1, received).sendToTarget();
+
+                        buffer = new byte[1024];
+
+                    } else if (key == 's') {
+
+                        // Gets first 2 positions from buffer
+                        received = String.valueOf(buffer).substring(0, 5);
+
+                        // Displays feedback from robot returns after pressing keywords
+                        handler.obtainMessage(MainActivity.STATUS_UPDATE, bytes,
+                                -1, received).sendToTarget();
+
+                        buffer = new byte[1024];
                     } else {
-                        if (key == 'g') {
-
-                            // Combines into a string to form grid parameter
-                            for (byte aBuffer : buffer) {
-                                received += (char) aBuffer;
-                            }
-
-                            // Updates grid
-                            handler.obtainMessage(MainActivity.GRID_UPDATE, bytes,
-                                    -1, received).sendToTarget();
-
-                            buffer = new byte[1024];
-
-                        } else if (key == 's') {
-
-                            // Gets first 2 positions from buffer
-                            for (byte aBuffer : buffer) {
-                                received += (char) aBuffer;
-                            }
-
-                            // Displays feedback from robot returns after pressing keywords
-                            handler.obtainMessage(
-                                    MainActivity.STATUS_UPDATE,
-                                    bytes, -1, received).sendToTarget();
-
-                            buffer = new byte[1024];
+                        //Other random info, most likely a result from debug tools testing bluetooth connection.
+                        for (byte aBuffer : buffer) {
+                            received += (char) aBuffer;
                         }
-                        else
-                        {
-                            //Other random info, most likely a result from debug tools testing bluetooth connection.
-                            for (byte aBuffer : buffer) {
-                                received += (char) aBuffer;
-                            }
-                            handler.obtainMessage(
-                                    MainActivity.STATUS_UPDATE,
-                                    bytes, -1, received).sendToTarget();
-
-                            buffer = new byte[1024];
-                        }
+                        handler.obtainMessage(MainActivity.STATUS_UPDATE,bytes,
+                                -1, received).sendToTarget();
+                        buffer = new byte[1024];
                     }
 
                     Log.i("Received data", received);

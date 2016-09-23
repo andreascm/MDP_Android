@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
@@ -26,28 +27,24 @@ public class MainActivity extends ActionBarActivity {
 
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-    private static final int CONFIG_SETTING = 3;
-    private static final int CUSTOM_COMMAND = 4;
-    private static final int LoadDefaultCoordinates = 5;
 
     private String deviceName = null;
     private ArrayAdapter<String> messageArrayAdapter;
     private BluetoothAdapter bluetoothAdapter = null;
     private Bluetooth bluetooth = null;
-
     private boolean bluetoothConnection = false;
     private boolean isAutoRefresh = true;
-
     private String deviceAddress = null;
-
     private Handler reconnectHandler;
     private BluetoothDevice device;
-
     public int reconnectCount = 0;
     public static boolean secureConnection;
 
-    private Map map = new Map();
-    private Robot robot = new Robot();
+    private Map map;
+    private Robot robot;
+    private MapView mapView;
+
+    private SharedPreferences sharedPreferences;
 
     private Button mBluetoothButton;
     private Button mSendButton;
@@ -89,6 +86,9 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
+
+        getSavedConfiguration();
+        setupMap();
     }
 
     @Override
@@ -169,6 +169,33 @@ public class MainActivity extends ActionBarActivity {
                         bluetooth.stop();
                     }
                     break;
+                case DISPLAY_MOVEMENT_AND_STATUS:
+                    String received = (String) msg.obj;
+                    if (received.charAt(0) == 'f') {
+                        map = robot.moveForward();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'b') {
+                        map = robot.moveBackward();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'l') {
+                        map = robot.turnLeft();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'r') {
+                        map = robot.turnRight();
+                        mapView.updatePainted(map.getMapData());
+                    }
+                    break;
+                case GRID_UPDATE:
+                    String grid = (String) msg.obj;
+                    int[][] map = new int[mapView.getNumRow()][mapView.getNumColumn()];
+
+                    for (int i=0; i<mapView.getNumRow(); i++) {
+                        for (int j=0; j<mapView.getNumColumn(); j++) {
+                            map[i][j] = Integer.valueOf(grid.charAt(i*mapView.getNumRow()+j));
+                        }
+                    }
+                    mapView.updatePainted(map);
+                    break;
                 case -1:
                     break;
             }
@@ -234,4 +261,22 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
     }
+
+    private void getSavedConfiguration() {
+        sharedPreferences = getSharedPreferences("SavedConfiguration", MODE_PRIVATE);
+    }
+
+    private void setupMap() {
+
+        map = new Map(0, 0);
+        map.resetMap();
+
+        robot = new Robot(map, 0, 0, Robot.RIGHT);
+        map = robot.discoverSurrounding();
+
+        mapView = new MapView(this, 0);
+        mapView.updatePainted(map.getMapData());
+    }
+
+
 }
