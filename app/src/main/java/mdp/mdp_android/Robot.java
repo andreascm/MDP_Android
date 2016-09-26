@@ -38,27 +38,24 @@ public class Robot {
         return map;
     }
 
-    public Map moveForward() {
+    public void moveForward() {
         updatePosition(MOVE_FORWARD);
-        return map;
     }
 
-    public Map moveBackward() {
+    public void moveBackward() {
         updatePosition(MOVE_BACKWARD);
-        return map;
     }
 
-    public Map turnLeft() {
+    public void turnLeft() {
         updatePosition(TURN_LEFT);
-        return map;
     }
 
-    public Map turnRight() {
+    public void turnRight() {
         updatePosition(TURN_RIGHT);
-        return map;
     }
 
     public Map discoverSurrounding() {
+        map.setDiscovered(current_x, current_y);
         if (current_x > -1 && current_y > -1) {
 
             if (current_y > 0) {
@@ -90,7 +87,6 @@ public class Robot {
     }
 
     public void updatePosition(int action) {
-        discoverSurrounding();
         if (action == MOVE_FORWARD) {
             if (direction == UP) {
                 current_y += 1;
@@ -132,5 +128,17 @@ public class Robot {
                 direction = DOWN;
             }
         }
+    }
+
+    public int getCurrentX() {
+        return current_x;
+    }
+
+    public int getCurrentY() {
+        return current_y;
+    }
+
+    public int getDirection() {
+        return direction;
     }
 }

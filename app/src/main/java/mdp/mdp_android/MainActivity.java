@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -43,11 +45,16 @@ public class MainActivity extends ActionBarActivity {
     private Map map;
     private Robot robot;
     private MapView mapView;
+    private View view;
+    private LinearLayout mapGrid;
 
     private SharedPreferences sharedPreferences;
 
-    private Button mBluetoothButton;
-    private Button mSendButton;
+    private ImageButton mBluetoothButton;
+    private ImageButton mForwardButton;
+    private ImageButton mLeftButton;
+    private ImageButton mRightButton;
+    private ImageButton mBackButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +69,7 @@ public class MainActivity extends ActionBarActivity {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        mBluetoothButton = (Button) findViewById(R.id.bluetooth_button);
-        mSendButton = (Button) findViewById(R.id.send_button);
+        mBluetoothButton = (ImageButton) findViewById(R.id.bluetoothButton);
 
         mBluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,18 +83,73 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        mSendButton.setOnClickListener(new View.OnClickListener() {
+        getSavedConfiguration();
+        setupMap();
+
+        mapGrid = (LinearLayout) findViewById(R.id.mapGrid);
+        mapGrid.addView(mapView);
+        mapGrid.invalidate();
+
+        mForwardButton = (ImageButton) findViewById(R.id.arrowUp);
+        mLeftButton = (ImageButton) findViewById(R.id.arrowLeft);
+        mRightButton = (ImageButton) findViewById(R.id.arrowRight);
+        mBackButton = (ImageButton) findViewById(R.id.arrowDown);
+
+        mForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (bluetooth.getState() == Bluetooth.STATE_CONNECTED) {
-                    String message = "message";
-                    bluetooth.write(message.getBytes());
-                }
+                robot.moveForward();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
             }
         });
 
-        getSavedConfiguration();
-        setupMap();
+        mLeftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.turnLeft();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
+        mRightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.turnRight();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
+        mBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.moveBackward();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
     }
 
     @Override
@@ -172,16 +233,20 @@ public class MainActivity extends ActionBarActivity {
                 case DISPLAY_MOVEMENT_AND_STATUS:
                     String received = (String) msg.obj;
                     if (received.charAt(0) == 'f') {
-                        map = robot.moveForward();
+                        robot.moveForward();
+                        map = robot.discoverSurrounding();
                         mapView.updatePainted(map.getMapData());
                     } else if (received.charAt(0) == 'b') {
-                        map = robot.moveBackward();
+                        robot.moveBackward();
+                        map = robot.discoverSurrounding();
                         mapView.updatePainted(map.getMapData());
                     } else if (received.charAt(0) == 'l') {
-                        map = robot.turnLeft();
+                        robot.turnLeft();
+                        map = robot.discoverSurrounding();
                         mapView.updatePainted(map.getMapData());
                     } else if (received.charAt(0) == 'r') {
-                        map = robot.turnRight();
+                        robot.turnRight();
+                        map = robot.discoverSurrounding();
                         mapView.updatePainted(map.getMapData());
                     }
                     break;
@@ -271,11 +336,18 @@ public class MainActivity extends ActionBarActivity {
         map = new Map(0, 0);
         map.resetMap();
 
-        robot = new Robot(map, 0, 0, Robot.RIGHT);
+        robot = new Robot(map, 1, 1, Robot.RIGHT);
         map = robot.discoverSurrounding();
 
-        mapView = new MapView(this, 0);
-        mapView.updatePainted(map.getMapData());
+        for (int i=0; i<15; i++) {
+            for (int j=0; j<20; j++) {
+                if (map.getMapData()[i][j] == 1) {
+                }
+            }
+        }
+
+        mapView = new MapView(this, map.getMapData());
+        mapView.invalidate();
     }
 
 
