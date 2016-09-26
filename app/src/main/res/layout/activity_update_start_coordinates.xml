@@ -1,15 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="mdp.mdp_android.UpdateStartCoordinates">
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:text="updatestartcoordinates"/>
-</RelativeLayout>
+    android:orientation="vertical"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp"
+    tools:context="mdp.mdp_android.ReconfigureButtons">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/xpos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X-Coordinate: "
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="50dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"/>
+
+        <EditText android:id="@+id/edittextxpos"
+            android:background="@drawable/back"
+            android:singleLine="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/colorPrimaryDark"
+            android:text=""
+            android:textSize="40dp"
+            android:textAlignment="center"
+            android:inputType="text" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp">
+        <TextView
+            android:id="@+id/ypos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Y-Coordinate: "
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="50dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"/>
+
+        <EditText android:id="@+id/edittextypos"
+            android:background="@drawable/back"
+            android:singleLine="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/colorPrimaryDark"
+            android:text=""
+            android:textSize="40dp"
+            android:textAlignment="center"
+            android:inputType="text" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_height="match_parent"
+        android:paddingBottom="30dp">>
+
+
+        <Button
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:text="Save"
+            android:textSize="30dp"
+            android:id="@+id/coordinateSavebutton"
+            android:layout_gravity="bottom" />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
