@@ -5,4 +5,7 @@
     <string name="error_connection_lost">Lost connection to device</string>
 
     <string name="notification_device_disconnected">Device has disconnected</string>
+    <string name="title_activity_update_start_coordinates">UpdateStartCoordinates</string>
+    <string name="title_activity_bluetooth_testing">BluetoothTesting</string>
+    <string name="title_activity_reconfigure_buttons">ReconfigureButtons</string>
 </resources>
