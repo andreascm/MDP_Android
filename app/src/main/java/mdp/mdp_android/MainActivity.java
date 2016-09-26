@@ -91,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
-            
+
             @Override
             public void onClick(View v) {
                 //Creating the instance of PopupMenu
@@ -108,11 +108,11 @@ public class MainActivity extends ActionBarActivity {
                                 startActivity(intent1);
                                 return true;
                             case R.id.startcoordinates:
-                                Intent intent2 = new Intent (MainActivity.this, UpdateStartCoordinates.class);
+                                Intent intent2 = new Intent(MainActivity.this, UpdateStartCoordinates.class);
                                 startActivity(intent2);
                                 return true;
                             case R.id.reconfigure:
-                                Intent intent3 = new Intent (MainActivity.this, ReconfigureButtons.class);
+                                Intent intent3 = new Intent(MainActivity.this, ReconfigureButtons.class);
                                 startActivity(intent3);
                                 return true;
                             default:
@@ -141,9 +141,16 @@ public class MainActivity extends ActionBarActivity {
         mForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String message = "f";
+                if (bluetooth != null) {
+                    bluetooth.write(message.getBytes());
+                }
                 robot.moveForward();
                 map = robot.discoverSurrounding();
                 Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
                 mapView.invalidate();
                 mapGrid.removeAllViewsInLayout();
@@ -155,9 +162,16 @@ public class MainActivity extends ActionBarActivity {
         mLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String message = "l";
+                if (bluetooth != null) {
+                    bluetooth.write(message.getBytes());
+                }
                 robot.turnLeft();
                 map = robot.discoverSurrounding();
                 Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
                 mapView.invalidate();
                 mapGrid.removeAllViewsInLayout();
@@ -169,9 +183,16 @@ public class MainActivity extends ActionBarActivity {
         mRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String message = "r";
+                if (bluetooth != null) {
+                    bluetooth.write(message.getBytes());
+                }
                 robot.turnRight();
                 map = robot.discoverSurrounding();
                 Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
                 mapView.invalidate();
                 mapGrid.removeAllViewsInLayout();
@@ -183,9 +204,16 @@ public class MainActivity extends ActionBarActivity {
         mBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String message = "b";
+                if (bluetooth != null) {
+                    bluetooth.write(message.getBytes());
+                }
                 robot.moveBackward();
                 map = robot.discoverSurrounding();
                 Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
                 mapView.invalidate();
                 mapGrid.removeAllViewsInLayout();
@@ -275,22 +303,39 @@ public class MainActivity extends ActionBarActivity {
                     break;
                 case DISPLAY_MOVEMENT_AND_STATUS:
                     String received = (String) msg.obj;
+                    Log.i("receive", received);
                     if (received.charAt(0) == 'f') {
                         robot.moveForward();
                         map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
+                        mapView.invalidate();
                     } else if (received.charAt(0) == 'b') {
                         robot.moveBackward();
                         map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
+                        mapView.invalidate();
                     } else if (received.charAt(0) == 'l') {
                         robot.turnLeft();
                         map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
+                        mapView.invalidate();
                     } else if (received.charAt(0) == 'r') {
                         robot.turnRight();
                         map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
+                        mapView.invalidate();
                     }
                     break;
                 case GRID_UPDATE:
@@ -389,7 +434,7 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        mapView = new MapView(this, map.getMapData());
+        mapView = new MapView(this, map.getMapData(), robot.getCurrentX(), robot.getCurrentY(), robot.getDirection());
         mapView.invalidate();
     }
 

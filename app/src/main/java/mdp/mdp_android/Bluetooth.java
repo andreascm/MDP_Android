@@ -258,15 +258,12 @@ public class Bluetooth {
                     // Read from the InputStream
                     bytes = inputStream.read(buffer);
 
-                    String received = "";
-                    Character key = Character.toLowerCase((char) buffer[0]);
+                    String received = new String(buffer, "UTF-8");;
+                    Character key = Character.toLowerCase((char) received.charAt(1));
 
                     // Movement keywords
                     // Deciphers input and sends it to initiate robot movements
                     if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f')) {
-
-                        // Gets first 2 positions from buffer
-                        received = String.valueOf(buffer).substring(0, 5);
 
                         // Displays feedback from robot returns after pressing
                         // keywords
@@ -278,9 +275,6 @@ public class Bluetooth {
                         // Redisplay information of grid
                     } else if (key == 'g') {
 
-                        // Combines into a string to form grid parameter
-                        received = String.valueOf(buffer).substring(0, 65);
-
                         // Updates grid
                         handler.obtainMessage(MainActivity.GRID_UPDATE, bytes,
                                 -1, received).sendToTarget();
@@ -288,9 +282,6 @@ public class Bluetooth {
                         buffer = new byte[1024];
 
                     } else if (key == 's') {
-
-                        // Gets first 2 positions from buffer
-                        received = String.valueOf(buffer).substring(0, 5);
 
                         // Displays feedback from robot returns after pressing keywords
                         handler.obtainMessage(MainActivity.STATUS_UPDATE, bytes,
