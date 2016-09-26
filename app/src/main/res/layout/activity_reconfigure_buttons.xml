@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp"
     tools:context="mdp.mdp_android.ReconfigureButtons">
 
     <LinearLayout
@@ -26,11 +26,12 @@
 
         <EditText android:id="@+id/edittextF1Config"
             android:background="@drawable/back"
-            android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textColor="@color/colorPrimaryDark"
             android:text=""
+            android:textSize="40dp"
+            android:textAlignment="center"
             android:inputType="text" />
 
     </LinearLayout>
@@ -50,15 +51,32 @@
 
         <EditText android:id="@+id/edittextF2Config"
             android:background="@drawable/back"
-            android:singleLine="true"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textColor="@color/colorPrimaryDark"
             android:text=""
-            android:inputType="text" />
+            android:inputType="text"
+            android:textSize="40dp"
+            android:textAlignment="center"/>
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_height="match_parent"
+        android:paddingBottom="30dp">>
+
+
+        <Button
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:text="Save"
+            android:textSize="30dp"
+            android:id="@+id/reconfigureSavebutton"
+            android:layout_gravity="bottom" />
+
+    </LinearLayout>
 
 
 

@@ -61,6 +61,8 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton mRightButton;
     private ImageButton mBackButton;
     private ImageButton settingsbutton2;
+    private Button f1button;
+    private Button f2button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +74,30 @@ public class MainActivity extends ActionBarActivity {
             deviceAddress = savedInstanceState.getString("deviceAddress");
             deviceName = savedInstanceState.getString("deviceName");
         }
+        sharedPreferences = getSharedPreferences("UserConfiguration",
+                MODE_PRIVATE);
+        f1button = (Button) findViewById(R.id.f1button);
+        f2button = (Button) findViewById(R.id.f2button);
+
+        f1button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String f1 = sharedPreferences.getString("f1", "");
+                if (bluetooth != null){
+                    bluetooth.write(f1.getBytes());
+                }
+            }
+        });
+
+        f2button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String f2 = sharedPreferences.getString("f2", "");
+                if (bluetooth != null){
+                    bluetooth.write(f2.getBytes());
+                }
+            }
+        });
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
