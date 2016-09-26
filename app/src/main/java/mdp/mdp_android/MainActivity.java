@@ -15,6 +15,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View.OnClickListener;
+import android.widget.PopupMenu;
 
 public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -55,6 +60,7 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton mLeftButton;
     private ImageButton mRightButton;
     private ImageButton mBackButton;
+    private ImageButton settingsbutton2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +88,43 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
+        
+        settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
+        settingsbutton2.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(MainActivity.this, settingsbutton2);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.bluetoothtesting:
+                                Intent intent1 = new Intent(MainActivity.this, BluetoothTesting.class);
+                                startActivity(intent1);
+                                return true;
+                            case R.id.startcoordinates:
+                                Intent intent2 = new Intent (MainActivity.this, UpdateStartCoordinates.class);
+                                startActivity(intent2);
+                                return true;
+                            case R.id.reconfigure:
+                                Intent intent3 = new Intent (MainActivity.this, ReconfigureButtons.class);
+                                startActivity(intent3);
+                                return true;
+                            default:
+                                return true;
+                        }
+
+                    }
+                });
+
+                popup.show();//showing popup menu
+            }
+        });//closing the setOnClickListener method
 
         getSavedConfiguration();
         setupMap();
