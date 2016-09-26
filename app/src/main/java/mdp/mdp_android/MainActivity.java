@@ -68,6 +68,7 @@ public class MainActivity extends ActionBarActivity {
 
     private ImageButton mBluetoothButton;
     private ImageButton settingsbutton2;
+    private Button mSendButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +84,7 @@ public class MainActivity extends ActionBarActivity {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         mBluetoothButton = (ImageButton) findViewById(R.id.bluetoothButton);
+        mSendButton = (Button) findViewById(R.id.send_button);
 
         mBluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,6 +97,17 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
+        
+        mSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bluetooth.getState() == Bluetooth.STATE_CONNECTED) {
+                    String message = "message";
+                    bluetooth.write(message.getBytes());
+                }
+            }
+        });
+        
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
 
