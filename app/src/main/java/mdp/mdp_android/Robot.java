@@ -55,32 +55,33 @@ public class Robot {
     }
 
     public Map discoverSurrounding() {
-        map.setDiscovered(current_x, current_y);
-        if (current_x > -1 && current_y > -1) {
-
-            if (current_y > 0) {
-                map.setDiscovered(current_x, current_y-1);
+        if (current_x > -1 && current_y > -1 && current_x < map.getMapWidth() && current_y < map.getMapLength()) {
+            map.setDiscovered(current_x, current_y);
+            if (current_x > -1 && current_y > -1) {
+                if (current_y > 0) {
+                    map.setDiscovered(current_x, current_y-1);
+                }
+                if (current_y < map.getMapLength()-1) {
+                    map.setDiscovered(current_x, current_y+1);
+                }
             }
-            if (current_y < map.getMapLength()-1) {
-                map.setDiscovered(current_x, current_y+1);
+            if (current_x > 0) {
+                if (current_y > 0) {
+                    map.setDiscovered(current_x-1, current_y-1);
+                }
+                map.setDiscovered(current_x-1, current_y);
+                if (current_y < map.getMapLength()-1) {
+                    map.setDiscovered(current_x-1, current_y+1);
+                }
             }
-        }
-        if (current_x > 0) {
-            if (current_y > 0) {
-                map.setDiscovered(current_x-1, current_y-1);
-            }
-            map.setDiscovered(current_x-1, current_y);
-            if (current_y < map.getMapLength()-1) {
-                map.setDiscovered(current_x-1, current_y+1);
-            }
-        }
-        if (current_x < map.getMapWidth()-1) {
-            if (current_y > 0) {
-                map.setDiscovered(current_x+1, current_y-1);
-            }
-            map.setDiscovered(current_x+1, current_y);
-            if (current_y < map.getMapLength()-1) {
-                map.setDiscovered(current_x+1, current_y+1);
+            if (current_x < map.getMapWidth()-1) {
+                if (current_y > 0) {
+                    map.setDiscovered(current_x+1, current_y-1);
+                }
+                map.setDiscovered(current_x+1, current_y);
+                if (current_y < map.getMapLength()-1) {
+                    map.setDiscovered(current_x+1, current_y+1);
+                }
             }
         }
         return map;
