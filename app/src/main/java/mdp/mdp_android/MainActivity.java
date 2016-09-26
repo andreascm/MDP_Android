@@ -68,7 +68,6 @@ public class MainActivity extends ActionBarActivity {
 
     private ImageButton mBluetoothButton;
     private ImageButton settingsbutton2;
-    private Button mSendButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,6 @@ public class MainActivity extends ActionBarActivity {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         mBluetoothButton = (ImageButton) findViewById(R.id.bluetoothButton);
-        mSendButton = (Button) findViewById(R.id.send_button);
 
         mBluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,16 +92,6 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
-                }
-            }
-        });
-        
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (bluetooth.getState() == Bluetooth.STATE_CONNECTED) {
-                    String message = "message";
-                    bluetooth.write(message.getBytes());
                 }
             }
         });
