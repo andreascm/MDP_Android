@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <item
+            android:id="@+id/bluetoothtesting"
+            android:title="Bluetooth Testing"/>
+
+        <item
+            android:id="@+id/startcoordinates"
+            android:title="Update Start Coordinates"/>
+
+        <item
+            android:id="@+id/reconfigure"
+            android:title="Reconfigure Buttons"/>
+
+
+</menu>
