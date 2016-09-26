@@ -8,4 +8,6 @@
     <string name="title_activity_update_start_coordinates">UpdateStartCoordinates</string>
     <string name="title_activity_bluetooth_testing">BluetoothTesting</string>
     <string name="title_activity_reconfigure_buttons">ReconfigureButtons</string>
+    <string name="title_activity_glmap">GLMap</string>
+    <string name="title_activity_graphics3d">Graphics3d</string>
 </resources>
