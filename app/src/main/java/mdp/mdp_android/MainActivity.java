@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,16 +14,14 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 import android.os.Bundle;
-import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
 
 public class MainActivity extends ActionBarActivity {
-    // Message types sent from the BluetoothService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -34,39 +32,34 @@ public class MainActivity extends ActionBarActivity {
     public static final int DISPLAY_MOVEMENT_AND_STATUS = 8;
     public static final int STATUS_UPDATE = 9;
 
-    // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-    private static final int CONFIG_SETTING = 3;
-    private static final int CUSTOM_COMMAND = 4;
-    private static final int LoadDefaultCoordinates = 5;
 
-    // Modes
-    private static final int MODE_EXPLORATION = 1;
-    private static final int MODE_RACE = 2;
-    private static final int MODE_MANUAL = 3;
-
-    // Name of the connected device
     private String deviceName = null;
-    // Array adapter for the conversation thread
     private ArrayAdapter<String> messageArrayAdapter;
-    // Local Bluetooth adapter
     private BluetoothAdapter bluetoothAdapter = null;
-    // Member object for the chat services
     private Bluetooth bluetooth = null;
-
     private boolean bluetoothConnection = false;
     private boolean isAutoRefresh = true;
-
     private String deviceAddress = null;
-
-    private Handler reconnectHandler; //For handling reconnection request.
+    private Handler reconnectHandler;
     private BluetoothDevice device;
-
     public int reconnectCount = 0;
-    public static boolean secureConnection; //Whether connection should be done in secure mode or not.
+    public static boolean secureConnection;
+
+    private Map map;
+    private Robot robot;
+    private MapView mapView;
+    private View view;
+    private LinearLayout mapGrid;
+
+    private SharedPreferences sharedPreferences;
 
     private ImageButton mBluetoothButton;
+    private ImageButton mForwardButton;
+    private ImageButton mLeftButton;
+    private ImageButton mRightButton;
+    private ImageButton mBackButton;
     private ImageButton settingsbutton2;
 
     @Override
@@ -98,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
-
+            
             @Override
             public void onClick(View v) {
                 //Creating the instance of PopupMenu
@@ -132,6 +125,74 @@ public class MainActivity extends ActionBarActivity {
                 popup.show();//showing popup menu
             }
         });//closing the setOnClickListener method
+
+        getSavedConfiguration();
+        setupMap();
+
+        mapGrid = (LinearLayout) findViewById(R.id.mapGrid);
+        mapGrid.addView(mapView);
+        mapGrid.invalidate();
+
+        mForwardButton = (ImageButton) findViewById(R.id.arrowUp);
+        mLeftButton = (ImageButton) findViewById(R.id.arrowLeft);
+        mRightButton = (ImageButton) findViewById(R.id.arrowRight);
+        mBackButton = (ImageButton) findViewById(R.id.arrowDown);
+
+        mForwardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.moveForward();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
+        mLeftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.turnLeft();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
+        mRightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.turnRight();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
+        mBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robot.moveBackward();
+                map = robot.discoverSurrounding();
+                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
     }
 
     @Override
@@ -212,6 +273,37 @@ public class MainActivity extends ActionBarActivity {
                         bluetooth.stop();
                     }
                     break;
+                case DISPLAY_MOVEMENT_AND_STATUS:
+                    String received = (String) msg.obj;
+                    if (received.charAt(0) == 'f') {
+                        robot.moveForward();
+                        map = robot.discoverSurrounding();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'b') {
+                        robot.moveBackward();
+                        map = robot.discoverSurrounding();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'l') {
+                        robot.turnLeft();
+                        map = robot.discoverSurrounding();
+                        mapView.updatePainted(map.getMapData());
+                    } else if (received.charAt(0) == 'r') {
+                        robot.turnRight();
+                        map = robot.discoverSurrounding();
+                        mapView.updatePainted(map.getMapData());
+                    }
+                    break;
+                case GRID_UPDATE:
+                    String grid = (String) msg.obj;
+                    int[][] map = new int[mapView.getNumRow()][mapView.getNumColumn()];
+
+                    for (int i=0; i<mapView.getNumRow(); i++) {
+                        for (int j=0; j<mapView.getNumColumn(); j++) {
+                            map[i][j] = Integer.valueOf(grid.charAt(i*mapView.getNumRow()+j));
+                        }
+                    }
+                    mapView.updatePainted(map);
+                    break;
                 case -1:
                     break;
             }
@@ -277,5 +369,29 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
     }
+
+    private void getSavedConfiguration() {
+        sharedPreferences = getSharedPreferences("SavedConfiguration", MODE_PRIVATE);
+    }
+
+    private void setupMap() {
+
+        map = new Map(0, 0);
+        map.resetMap();
+
+        robot = new Robot(map, 1, 1, Robot.RIGHT);
+        map = robot.discoverSurrounding();
+
+        for (int i=0; i<15; i++) {
+            for (int j=0; j<20; j++) {
+                if (map.getMapData()[i][j] == 1) {
+                }
+            }
+        }
+
+        mapView = new MapView(this, map.getMapData());
+        mapView.invalidate();
+    }
+
 
 }
