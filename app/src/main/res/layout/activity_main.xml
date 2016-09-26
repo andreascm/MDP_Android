@@ -38,6 +38,7 @@
             android:id="@+id/settingsButton2"
             android:src="@drawable/dotmenu"
             android:layout_weight="0.02"
+            android:onClick="Show Popup"
             android:background="#00000000" />
     </LinearLayout>
 
