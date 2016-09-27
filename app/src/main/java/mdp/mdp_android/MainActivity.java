@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
+import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -39,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
     private BluetoothAdapter bluetoothAdapter = null;
     private static Bluetooth bluetooth = null;
     private boolean bluetoothConnection = false;
-    private boolean isAutoRefresh = true;
+    private static boolean autoMode = true;
     private String deviceAddress = null;
     private Handler reconnectHandler;
     private BluetoothDevice device;
@@ -63,6 +65,8 @@ public class MainActivity extends ActionBarActivity {
     private Button f1Button;
     private Button f2Button;
     private Button startButton;
+    private Button updateButton;
+    private ToggleButton autoButton;
     private EditText mStatus;
 
     @Override
@@ -153,6 +157,28 @@ public class MainActivity extends ActionBarActivity {
             }
         });//closing the setOnClickListener method
 
+        updateButton = (Button) findViewById(R.id.updatebutton);
+        updateButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                }
+            }
+        });
+
+        autoButton = (ToggleButton) findViewById(R.id.autoButton);
+        autoButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                autoMode = !isChecked;
+                Log.i("isChecked", String.valueOf(autoMode));
+            }
+        });
+
         startButton = (Button) findViewById(R.id.startbutton);
         startButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -191,10 +217,12 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                }
                 mStatus.setText("Move Forward");
             }
         });
@@ -213,10 +241,12 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                }
                 mStatus.setText("Turn Left");
             }
         });
@@ -235,10 +265,12 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                }
                 mStatus.setText("Turn Right");
             }
         });
@@ -257,10 +289,12 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                }
                 mStatus.setText("Move Bakcward");
             }
         });
@@ -354,7 +388,12 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
                         mStatus.setText("Move Forward");
                     } else if (received.charAt(0) == 'b') {
                         robot.moveBackward();
@@ -363,7 +402,12 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
                         mStatus.setText("Move Backward");
                     } else if (received.charAt(0) == 'l') {
                         robot.turnLeft();
@@ -372,7 +416,12 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
                         mStatus.setText("Turn Left");
                     } else if (received.charAt(0) == 'r') {
                         robot.turnRight();
@@ -381,7 +430,12 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
                         mStatus.setText("Turn Right");
                     }
                     break;
@@ -472,8 +526,13 @@ public class MainActivity extends ActionBarActivity {
                         }
                         map.setObstacle(obstacleX, obstacleY);
                     }
-
-                    //mapView.updatePainted(map);
+                    mapView.updatePainted(map.getMapData());
+                    if (autoMode) {
+                        mapView.invalidate();
+                        mapGrid.removeAllViewsInLayout();
+                        mapGrid.addView(mapView);
+                        mapGrid.invalidate();
+                    }
                     break;
                 case -1:
                     break;
