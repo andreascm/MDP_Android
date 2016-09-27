@@ -130,7 +130,6 @@ public class MapView extends View {
 
     public void updatePainted(int[][] map) {
         painted = map;
-        invalidate();
     }
 
     public int getNumColumn() {
