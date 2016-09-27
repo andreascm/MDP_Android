@@ -5,6 +5,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
@@ -13,16 +17,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
-import android.widget.ToggleButton;
+import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -41,7 +44,7 @@ public class MainActivity extends ActionBarActivity {
     private BluetoothAdapter bluetoothAdapter = null;
     private static Bluetooth bluetooth = null;
     private boolean bluetoothConnection = false;
-    private static boolean autoMode = true;
+    private boolean isAutoRefresh = true;
     private String deviceAddress = null;
     private Handler reconnectHandler;
     private BluetoothDevice device;
@@ -62,12 +65,16 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton mRightButton;
     private ImageButton mBackButton;
     private ImageButton settingsbutton2;
+    private ImageButton settingsbutton;
     private Button f1Button;
     private Button f2Button;
     private Button startButton;
-    private Button updateButton;
-    private ToggleButton autoButton;
     private EditText mStatus;
+
+    public boolean tiltMode= false;
+    private float ref_tilt = 0;
+    private boolean startup_tilt = true;
+    private int pre_state = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +88,12 @@ public class MainActivity extends ActionBarActivity {
         }
         sharedPreferences = getSharedPreferences("UserConfiguration",
                 MODE_PRIVATE);
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // add listener. The listener will be HelloAndroid (this) class
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+
         f1Button = (Button) findViewById(R.id.f1button);
         f2Button = (Button) findViewById(R.id.f2button);
 
@@ -119,7 +132,40 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
-        
+        settingsbutton = (ImageButton) findViewById(R.id.settingsButton);
+        settingsbutton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup2 = new PopupMenu(MainActivity.this, settingsbutton);
+                popup2.getMenuInflater().inflate(R.menu.popup_menu2, popup2.getMenu());
+                popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+                    public boolean onMenuItemClick(MenuItem item){
+                        switch (item.getItemId()){
+                            case R.id.tiltmode:
+                                /* tilt mode */
+                                if (tiltMode) {
+                                    Toast.makeText(getApplicationContext(), R.string.Tilt_Off,
+                                            Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.Tilt_On,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+
+                                tiltMode = !tiltMode; //Toggle the tilt mode settings.
+
+                                invalidateOptionsMenu();
+                                return true;
+                            case R.id.joystick:
+                                /* joystick codes */
+                                return true;
+                            default:
+                                return true;
+                        }
+                    }
+                });
+                popup2.show();
+            }
+        });
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
 
@@ -156,28 +202,6 @@ public class MainActivity extends ActionBarActivity {
                 popup.show();//showing popup menu
             }
         });//closing the setOnClickListener method
-
-        updateButton = (Button) findViewById(R.id.updatebutton);
-        updateButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
-            }
-        });
-
-        autoButton = (ToggleButton) findViewById(R.id.autoButton);
-        autoButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                autoMode = !isChecked;
-                Log.i("isChecked", String.valueOf(autoMode));
-            }
-        });
 
         startButton = (Button) findViewById(R.id.startbutton);
         startButton.setOnClickListener(new OnClickListener() {
@@ -217,12 +241,10 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Move Forward");
             }
         });
@@ -241,12 +263,10 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Turn Left");
             }
         });
@@ -265,12 +285,10 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Turn Right");
             }
         });
@@ -289,12 +307,10 @@ public class MainActivity extends ActionBarActivity {
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Move Bakcward");
             }
         });
@@ -388,12 +404,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Move Forward");
                     } else if (received.charAt(0) == 'b') {
                         robot.moveBackward();
@@ -402,12 +413,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Move Backward");
                     } else if (received.charAt(0) == 'l') {
                         robot.turnLeft();
@@ -416,12 +422,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Turn Left");
                     } else if (received.charAt(0) == 'r') {
                         robot.turnRight();
@@ -430,12 +431,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Turn Right");
                     }
                     break;
@@ -526,13 +522,8 @@ public class MainActivity extends ActionBarActivity {
                         }
                         map.setObstacle(obstacleX, obstacleY);
                     }
-                    mapView.updatePainted(map.getMapData());
-                    if (autoMode) {
-                        mapView.invalidate();
-                        mapGrid.removeAllViewsInLayout();
-                        mapGrid.addView(mapView);
-                        mapGrid.invalidate();
-                    }
+
+                    //mapView.updatePainted(map);
                     break;
                 case -1:
                     break;
@@ -625,5 +616,111 @@ public class MainActivity extends ActionBarActivity {
 
     public static Bluetooth getBluetooth() {
         return bluetooth;
+    }
+
+    public void tiltTurnRight()
+    {
+        String message = "hr";
+        if (bluetooth != null) {
+            bluetooth.write(message.getBytes());
+        }
+        if (isAutoRefresh) {
+            robot.turnRight();
+        }
+    }
+
+    public void tiltTurnLeft()
+    {
+        String message = "hl";
+        if (bluetooth != null) {
+            bluetooth.write(message.getBytes());
+        }
+        if (isAutoRefresh) {
+            robot.turnLeft();
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // check sensor type
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+            // assign directions
+            float x = event.values[0];
+            float y = event.values[1];
+
+            if (tiltMode) {
+
+                if (startup_tilt) {
+                    ref_tilt = y;//Capture the 1st y-axis tilt to offset.
+                    startup_tilt = false;
+                }
+
+                if (x < -1) {
+                    //When x is negative value, it is tilting towards RIGHT.
+                    if (x > -4) {
+                        pre_state = 0; //Register position as centered.
+
+                    } else if (x <= -4) {
+                        //When x is <= -4, it is expected to turn right.
+                        if (pre_state != 2) {
+                            //Tilt right IF previously the state is NOT tilted towards right.
+                            pre_state = 2;
+                            tiltTurnRight();
+                        }
+                    }
+                } else if (x > 1) {
+                    //When x is a positive value, it is tilting towards LEFT.
+                    if (x < 4) {
+                        pre_state = 0;
+                    } else if (x >= 4) {
+                        //When x is >= 4, it is expected to turn left.
+                        if (pre_state != 1) {
+                            //Tilt left IF previously the state is NOT tilted towards left.
+                            pre_state = 1;
+                            tiltTurnLeft();
+                        }
+                    }
+                } else if (y > 3 + ref_tilt) {
+                    //If y is more than 3 of first held offset, it is expected to reverse.
+                    pre_state = 0;
+                    String message = "hb";
+                    if (bluetooth != null) {
+                        bluetooth.write(message.getBytes());
+                    }
+                    if (isAutoRefresh) {
+                        robot.moveBackward();
+                    }
+                } else if (y < -0.5 + ref_tilt) {
+                    //Robots moves at a very slight of tilting forward.
+                    pre_state = 0;
+                    String message = "hf";
+                    if (bluetooth != null) {
+                        bluetooth.write(message.getBytes());
+                    }
+                    if (isAutoRefresh) {
+                        robot.moveForward();
+                    }
+
+                }
+                map = robot.discoverSurrounding();
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+
+            }
+        }
+
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // TODO Auto-generated method stub
+
     }
 }
