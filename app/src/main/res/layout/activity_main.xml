@@ -59,6 +59,13 @@
             android:layout_height="600dp">
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/joystickLayout"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
+
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
