@@ -12,4 +12,6 @@
     <string name="title_activity_graphics3d">Graphics3d</string>
     <string name="Tilt_On">Tilt mode has turned on.</string>
     <string name="Tilt_Off">Tilt mode has turned off.</string>
+    <string name="Joystick_On">Joystick mode has turned on.</string>
+    <string name="Joystick_Off">Joystick mode has turned off.</string>
 </resources>
