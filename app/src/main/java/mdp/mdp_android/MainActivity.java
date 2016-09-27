@@ -17,18 +17,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
-<<<<<<< HEAD
 import android.widget.Toast;
-=======
-import android.widget.ToggleButton;
->>>>>>> origin
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -49,7 +44,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private BluetoothAdapter bluetoothAdapter = null;
     private static Bluetooth bluetooth = null;
     private boolean bluetoothConnection = false;
-    private static boolean autoMode = true;
+    private boolean isAutoRefresh = true;
     private String deviceAddress = null;
     private Handler reconnectHandler;
     private BluetoothDevice device;
@@ -74,8 +69,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Button f1Button;
     private Button f2Button;
     private Button startButton;
-    private Button updateButton;
-    private ToggleButton autoButton;
     private EditText mStatus;
 
     public boolean tiltMode= false;
@@ -210,28 +203,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             }
         });//closing the setOnClickListener method
 
-        updateButton = (Button) findViewById(R.id.updatebutton);
-        updateButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
-            }
-        });
-
-        autoButton = (ToggleButton) findViewById(R.id.autoButton);
-        autoButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                autoMode = !isChecked;
-                Log.i("isChecked", String.valueOf(autoMode));
-            }
-        });
-
         startButton = (Button) findViewById(R.id.startbutton);
         startButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -270,12 +241,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Move Forward");
             }
         });
@@ -294,12 +263,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Turn Left");
             }
         });
@@ -318,12 +285,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Turn Right");
             }
         });
@@ -342,12 +307,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                if (autoMode) {
-                    mapView.invalidate();
-                    mapGrid.removeAllViewsInLayout();
-                    mapGrid.addView(mapView);
-                    mapGrid.invalidate();
-                }
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
                 mStatus.setText("Move Bakcward");
             }
         });
@@ -441,12 +404,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Move Forward");
                     } else if (received.charAt(0) == 'b') {
                         robot.moveBackward();
@@ -455,12 +413,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Move Backward");
                     } else if (received.charAt(0) == 'l') {
                         robot.turnLeft();
@@ -469,12 +422,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Turn Left");
                     } else if (received.charAt(0) == 'r') {
                         robot.turnRight();
@@ -483,12 +431,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         mapView.setCurrentY(robot.getCurrentY());
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
-                        if (autoMode) {
-                            mapView.invalidate();
-                            mapGrid.removeAllViewsInLayout();
-                            mapGrid.addView(mapView);
-                            mapGrid.invalidate();
-                        }
+                        mapView.invalidate();
                         mStatus.setText("Turn Right");
                     }
                     break;
@@ -579,13 +522,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         }
                         map.setObstacle(obstacleX, obstacleY);
                     }
-                    mapView.updatePainted(map.getMapData());
-                    if (autoMode) {
-                        mapView.invalidate();
-                        mapGrid.removeAllViewsInLayout();
-                        mapGrid.addView(mapView);
-                        mapGrid.invalidate();
-                    }
+
+                    //mapView.updatePainted(map);
                     break;
                 case -1:
                     break;
