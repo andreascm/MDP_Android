@@ -167,7 +167,7 @@ public class MainActivity extends ActionBarActivity {
         mForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "f";
+                String message = "pf";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -188,7 +188,7 @@ public class MainActivity extends ActionBarActivity {
         mLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "l";
+                String message = "pl";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -209,7 +209,7 @@ public class MainActivity extends ActionBarActivity {
         mRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "r";
+                String message = "pr";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -230,7 +230,7 @@ public class MainActivity extends ActionBarActivity {
         mBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "b";
+                String message = "hb";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
