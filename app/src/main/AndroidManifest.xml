@@ -26,10 +26,6 @@
         <activity android:name=".ReconfigureButtons" />
         <activity android:name=".UpdateStartCoordinates" />
         <activity android:name=".BluetoothTesting" />
-        <activity
-            android:name=".Graphics3d"
-            android:label="@string/title_activity_graphics3d">
-        </activity>
     </application>
 
 </manifest>
