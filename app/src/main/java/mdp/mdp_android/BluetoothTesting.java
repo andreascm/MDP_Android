@@ -39,7 +39,7 @@ public class BluetoothTesting extends ActionBarActivity {
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
-                finish();
+
             }
         });
     }
