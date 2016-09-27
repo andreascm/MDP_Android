@@ -44,7 +44,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private BluetoothAdapter bluetoothAdapter = null;
     private static Bluetooth bluetooth = null;
     private boolean bluetoothConnection = false;
-    private boolean isAutoRefresh = true;
+    private boolean autoMode = true;
     private String deviceAddress = null;
     private Handler reconnectHandler;
     private BluetoothDevice device;
@@ -73,7 +73,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Button startButton;
     private EditText mStatus;
 
-    public boolean tiltMode= false;
+    private boolean tiltMode= false;
+    private boolean joystickMode = false;
     private float ref_tilt = 0;
     private boolean startup_tilt = true;
     private int pre_state = 0;
@@ -158,7 +159,24 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                                 invalidateOptionsMenu();
                                 return true;
                             case R.id.joystick:
-                                /* joystick codes */
+                                /* joystick mode */
+                                if (joystickMode) {
+                                    Toast.makeText(getApplicationContext(), R.string.Joystick_Off,
+                                            Toast.LENGTH_SHORT).show();
+                                    joystickLayout.removeAllViewsInLayout();
+                                    joystickLayout.setVisibility(View.GONE);
+                                    joystickLayout.invalidate();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.Joystick_On,
+                                            Toast.LENGTH_SHORT).show();
+                                    joystickLayout.addView(joystick);
+                                    joystickLayout.setVisibility(View.VISIBLE);
+                                    joystickLayout.invalidate();
+                                }
+
+                                joystickMode = !joystickMode; //Toggle the tilt mode settings.
+
+                                invalidateOptionsMenu();
                                 return true;
                             default:
                                 return true;
@@ -308,7 +326,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             }
         }, 500);
         joystickLayout = (LinearLayout) findViewById(R.id.joystickLayout);
-        joystickLayout.addView(joystick);
 
         mForwardButton = (ImageButton) findViewById(R.id.arrowUp);
         mLeftButton = (ImageButton) findViewById(R.id.arrowLeft);
@@ -708,7 +725,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         if (bluetooth != null) {
             bluetooth.write(message.getBytes());
         }
-        if (isAutoRefresh) {
+        if (autoMode) {
             robot.turnRight();
         }
     }
@@ -719,7 +736,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         if (bluetooth != null) {
             bluetooth.write(message.getBytes());
         }
-        if (isAutoRefresh) {
+        if (autoMode) {
             robot.turnLeft();
         }
     }
@@ -773,7 +790,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     if (bluetooth != null) {
                         bluetooth.write(message.getBytes());
                     }
-                    if (isAutoRefresh) {
+                    if (autoMode) {
                         robot.moveBackward();
                     }
                 } else if (y < -0.5 + ref_tilt) {
@@ -783,7 +800,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     if (bluetooth != null) {
                         bluetooth.write(message.getBytes());
                     }
-                    if (isAutoRefresh) {
+                    if (autoMode) {
                         robot.moveForward();
                     }
 
