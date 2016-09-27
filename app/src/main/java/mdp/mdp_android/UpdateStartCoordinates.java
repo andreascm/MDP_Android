@@ -12,12 +12,12 @@ public class UpdateStartCoordinates extends ActionBarActivity {
     private SharedPreferences mSharedPreferences;
     private EditText edittextxpos, edittextypos;
     private Button saveButton;
-
+    private Bluetooth bluetooth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_start_coordinates);
-
+        bluetooth = MainActivity.getBluetooth();
         edittextxpos = (EditText) findViewById(R.id.edittextxpos);
         edittextypos = (EditText) findViewById(R.id.edittextypos);
 
@@ -38,6 +38,11 @@ public class UpdateStartCoordinates extends ActionBarActivity {
                 editor.putString("xpos", xpos);
                 editor.putString("ypos", ypos);
                 editor.apply();
+                if (bluetooth != null) {
+                    bluetooth.write(("px" + xpos).getBytes());
+                    bluetooth.write(("py" + ypos).getBytes());
+                }
+
                 finish();
             }
         });
