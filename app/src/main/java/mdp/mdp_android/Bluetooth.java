@@ -257,8 +257,17 @@ public class Bluetooth {
                 try {
                     // Read from the InputStream
                     bytes = inputStream.read(buffer);
+                    String received = "";
 
-                    String received = new String(buffer, 1, bytes);
+                    Log.i("buffer", new String(buffer, 0, bytes));
+
+                    for (byte aBuffer : buffer) {
+                        if (aBuffer >= 0) {
+                            received += (char) aBuffer;
+                        } else {
+                            break;
+                        }
+                    }
                     Character key = Character.toLowerCase((char) received.charAt(1));
 
                     // Movement keywords
@@ -290,9 +299,6 @@ public class Bluetooth {
                         buffer = new byte[1024];
                     } else {
                         //Other random info, most likely a result from debug tools testing bluetooth connection.
-                        for (byte aBuffer : buffer) {
-                            received += (char) aBuffer;
-                        }
                         handler.obtainMessage(MainActivity.STATUS_UPDATE,bytes,
                                 -1, received).sendToTarget();
                         buffer = new byte[1024];
