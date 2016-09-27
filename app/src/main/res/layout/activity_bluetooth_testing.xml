@@ -38,6 +38,10 @@
             android:background="@drawable/back"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="40dp"
+            android:clickable="false"
+            android:focusable="false"
+            android:cursorVisible="false"
+            android:focusableInTouchMode="false"
             android:inputType="text"/>
     </LinearLayout>
 
