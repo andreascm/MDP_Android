@@ -10,4 +10,6 @@
     <string name="title_activity_reconfigure_buttons">ReconfigureButtons</string>
     <string name="title_activity_glmap">GLMap</string>
     <string name="title_activity_graphics3d">Graphics3d</string>
+    <string name="Tilt_On">Tilt mode has turned on.</string>
+    <string name="Tilt_Off">Tilt mode has turned off.</string>
 </resources>
