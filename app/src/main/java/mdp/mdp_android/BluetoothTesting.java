@@ -22,7 +22,7 @@ public class BluetoothTesting extends ActionBarActivity {
         receivedmessage= (EditText) findViewById(R.id.receivedmessage) ;
         sendmessage = (EditText) findViewById(R.id.sendmessage);
         bluetooth = MainActivity.getBluetooth();
-        
+
         sendmessagebutton = (Button) findViewById(R.id.sendmessagebutton);
         mSharedPreferences = getSharedPreferences("UserConfiguration",
                 MODE_PRIVATE);
