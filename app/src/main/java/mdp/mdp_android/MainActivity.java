@@ -5,6 +5,10 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
@@ -21,7 +25,7 @@ import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
@@ -70,7 +74,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean tiltMode= false;
     private float ref_tilt = 0;
     private boolean startup_tilt = true;
-
+    private int pre_state = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,12 @@ public class MainActivity extends ActionBarActivity {
         }
         sharedPreferences = getSharedPreferences("UserConfiguration",
                 MODE_PRIVATE);
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        // add listener. The listener will be HelloAndroid (this) class
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+
         f1Button = (Button) findViewById(R.id.f1button);
         f2Button = (Button) findViewById(R.id.f2button);
 
@@ -606,5 +616,111 @@ public class MainActivity extends ActionBarActivity {
 
     public static Bluetooth getBluetooth() {
         return bluetooth;
+    }
+
+    public void tiltTurnRight()
+    {
+        String message = "hr";
+        if (bluetooth != null) {
+            bluetooth.write(message.getBytes());
+        }
+        if (isAutoRefresh) {
+            robot.turnRight();
+        }
+    }
+
+    public void tiltTurnLeft()
+    {
+        String message = "hl";
+        if (bluetooth != null) {
+            bluetooth.write(message.getBytes());
+        }
+        if (isAutoRefresh) {
+            robot.turnLeft();
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        // check sensor type
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+            // assign directions
+            float x = event.values[0];
+            float y = event.values[1];
+
+            if (tiltMode) {
+
+                if (startup_tilt) {
+                    ref_tilt = y;//Capture the 1st y-axis tilt to offset.
+                    startup_tilt = false;
+                }
+
+                if (x < -1) {
+                    //When x is negative value, it is tilting towards RIGHT.
+                    if (x > -4) {
+                        pre_state = 0; //Register position as centered.
+
+                    } else if (x <= -4) {
+                        //When x is <= -4, it is expected to turn right.
+                        if (pre_state != 2) {
+                            //Tilt right IF previously the state is NOT tilted towards right.
+                            pre_state = 2;
+                            tiltTurnRight();
+                        }
+                    }
+                } else if (x > 1) {
+                    //When x is a positive value, it is tilting towards LEFT.
+                    if (x < 4) {
+                        pre_state = 0;
+                    } else if (x >= 4) {
+                        //When x is >= 4, it is expected to turn left.
+                        if (pre_state != 1) {
+                            //Tilt left IF previously the state is NOT tilted towards left.
+                            pre_state = 1;
+                            tiltTurnLeft();
+                        }
+                    }
+                } else if (y > 3 + ref_tilt) {
+                    //If y is more than 3 of first held offset, it is expected to reverse.
+                    pre_state = 0;
+                    String message = "hb";
+                    if (bluetooth != null) {
+                        bluetooth.write(message.getBytes());
+                    }
+                    if (isAutoRefresh) {
+                        robot.moveBackward();
+                    }
+                } else if (y < -0.5 + ref_tilt) {
+                    //Robots moves at a very slight of tilting forward.
+                    pre_state = 0;
+                    String message = "hf";
+                    if (bluetooth != null) {
+                        bluetooth.write(message.getBytes());
+                    }
+                    if (isAutoRefresh) {
+                        robot.moveForward();
+                    }
+
+                }
+                map = robot.discoverSurrounding();
+                mapView.setCurrentX(robot.getCurrentX());
+                mapView.setCurrentY(robot.getCurrentY());
+                mapView.setDirection(robot.getDirection());
+                mapView.updatePainted(map.getMapData());
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+
+            }
+        }
+
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // TODO Auto-generated method stub
+
     }
 }

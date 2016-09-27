@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class BluetoothTesting extends ActionBarActivity {
 
     private SharedPreferences mSharedPreferences;
-    private EditText sendmessage, receivedmessage;
+    private EditText sendmessage;
+    private TextView receivedmessage;
     private Button sendmessagebutton;
     private Bluetooth bluetooth;
 
@@ -24,7 +26,7 @@ public class BluetoothTesting extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_testing);
 
-        receivedmessage = (EditText) findViewById(R.id.receivedmessage);
+        receivedmessage = (TextView) findViewById(R.id.receivedmessage);
         sendmessage = (EditText) findViewById(R.id.sendmessage);
         bluetooth = MainActivity.getBluetooth();
 

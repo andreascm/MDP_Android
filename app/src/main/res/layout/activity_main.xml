@@ -30,6 +30,7 @@
             android:id="@+id/settingsButton"
             android:src="@drawable/settings"
             android:layout_weight="0.02"
+            android:onClick="Show Popup"
             android:background="#00000000"/>
 
         <ImageButton
