@@ -54,8 +54,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Map map;
     private Robot robot;
     private MapView mapView;
+    private Joystick joystick;
     private View view;
     private LinearLayout mapGrid;
+    private LinearLayout joystickLayout;
 
     private SharedPreferences sharedPreferences;
 
@@ -222,6 +224,92 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mapGrid.addView(mapView);
         mapGrid.invalidate();
 
+        joystick = new Joystick(this);
+        joystick.setOnJoystickMoveListener(new Joystick.OnJoystickMoveListener() {
+            @Override
+            public void onValueChanged(int angle, int power, int direction) {
+                Log.i("direction", String.valueOf(direction));
+                Log.e("angle", String.valueOf(angle));
+                if (power > 90) {
+                    if (direction == Joystick.UP) {
+                        String message = "hf";
+                        if (bluetooth != null) {
+                            bluetooth.write(message.getBytes());
+                        }
+                        robot.moveForward();
+                        map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
+                        mapView.updatePainted(map.getMapData());
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
+                        mStatus.setText("Move Forward");
+                    } else if (direction == Joystick.DOWN) {
+                        String message = "hb";
+                        if (bluetooth != null) {
+                            bluetooth.write(message.getBytes());
+                        }
+                        robot.moveBackward();
+                        map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
+                        mapView.updatePainted(map.getMapData());
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
+                        mStatus.setText("Move Bakcward");
+                    } else if (direction == Joystick.LEFT) {
+                        String message = "hl";
+                        if (bluetooth != null) {
+                            bluetooth.write(message.getBytes());
+                        }
+                        robot.turnLeft();
+                        map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
+                        mapView.updatePainted(map.getMapData());
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
+                        mStatus.setText("Turn Left");
+                    } else if (direction == Joystick.RIGHT) {
+                        String message = "hr";
+                        if (bluetooth != null) {
+                            bluetooth.write(message.getBytes());
+                        }
+                        robot.turnRight();
+                        map = robot.discoverSurrounding();
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
+                        mapView.updatePainted(map.getMapData());
+                        if (autoMode) {
+                            mapView.invalidate();
+                            mapGrid.removeAllViewsInLayout();
+                            mapGrid.addView(mapView);
+                            mapGrid.invalidate();
+                        }
+                        mStatus.setText("Turn Right");
+                    }
+                }
+            }
+        }, 500);
+        joystickLayout = (LinearLayout) findViewById(R.id.joystickLayout);
+        joystickLayout.addView(joystick);
+
         mForwardButton = (ImageButton) findViewById(R.id.arrowUp);
         mLeftButton = (ImageButton) findViewById(R.id.arrowLeft);
         mRightButton = (ImageButton) findViewById(R.id.arrowRight);
@@ -236,7 +324,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 }
                 robot.moveForward();
                 map = robot.discoverSurrounding();
-                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
                 mapView.setCurrentX(robot.getCurrentX());
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
@@ -258,7 +345,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 }
                 robot.turnLeft();
                 map = robot.discoverSurrounding();
-                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
                 mapView.setCurrentX(robot.getCurrentX());
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
@@ -280,7 +366,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 }
                 robot.turnRight();
                 map = robot.discoverSurrounding();
-                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
                 mapView.setCurrentX(robot.getCurrentX());
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
@@ -302,7 +387,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 }
                 robot.moveBackward();
                 map = robot.discoverSurrounding();
-                Log.i("robot", robot.getCurrentX() + " " + robot.getCurrentY() + " " + robot.getDirection());
                 mapView.setCurrentX(robot.getCurrentX());
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
