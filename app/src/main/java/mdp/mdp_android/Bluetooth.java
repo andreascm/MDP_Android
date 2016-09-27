@@ -258,7 +258,7 @@ public class Bluetooth {
                     // Read from the InputStream
                     bytes = inputStream.read(buffer);
 
-                    String received = new String(buffer, "ASCII");
+                    String received = new String(buffer, 1, bytes);
                     Character key = Character.toLowerCase((char) received.charAt(1));
 
                     // Movement keywords
@@ -273,11 +273,11 @@ public class Bluetooth {
 
                         // Reset grid
                         // Redisplay information of grid
-                    } else if (key == 'g') {
+                    } else if (key == 'o') {
 
                         // Updates grid
-                        handler.obtainMessage(MainActivity.GRID_UPDATE, bytes,
-                                -1, received).sendToTarget();
+                        handler.obtainMessage(MainActivity.OBSTACLE_UPDATE, bytes,
+                                -1, received.substring(1)).sendToTarget();
 
                         buffer = new byte[1024];
 

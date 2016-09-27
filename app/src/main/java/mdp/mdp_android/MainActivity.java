@@ -15,8 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
@@ -28,7 +26,7 @@ public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_BLUETOOTH_DISCONNECT = 5;
     public static final int MESSAGE_BLUETOOTH_ERROR = 6;
-    public static final int GRID_UPDATE = 7;
+    public static final int OBSTACLE_UPDATE = 7;
     public static final int DISPLAY_MOVEMENT_AND_STATUS = 8;
     public static final int STATUS_UPDATE = 9;
 
@@ -38,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
     private String deviceName = null;
     private ArrayAdapter<String> messageArrayAdapter;
     private BluetoothAdapter bluetoothAdapter = null;
-    private Bluetooth bluetooth = null;
+    private static Bluetooth bluetooth = null;
     private boolean bluetoothConnection = false;
     private boolean isAutoRefresh = true;
     private String deviceAddress = null;
@@ -364,16 +362,11 @@ public class MainActivity extends ActionBarActivity {
                         mapView.invalidate();
                     }
                     break;
-                case GRID_UPDATE:
-                    String grid = (String) msg.obj;
-                    int[][] map = new int[mapView.getNumRow()][mapView.getNumColumn()];
+                case OBSTACLE_UPDATE:
+                    String sensor = (String) msg.obj;
 
-                    for (int i=0; i<mapView.getNumRow(); i++) {
-                        for (int j=0; j<mapView.getNumColumn(); j++) {
-                            map[i][j] = Integer.valueOf(grid.charAt(i*mapView.getNumRow()+j));
-                        }
-                    }
-                    mapView.updatePainted(map);
+
+                    //mapView.updatePainted(map);
                     break;
                 case -1:
                     break;
@@ -464,5 +457,7 @@ public class MainActivity extends ActionBarActivity {
         mapView.invalidate();
     }
 
-
+    public static Bluetooth getBluetooth() {
+        return bluetooth;
+    }
 }
