@@ -258,7 +258,7 @@ public class Bluetooth {
                     // Read from the InputStream
                     bytes = inputStream.read(buffer);
 
-                    String received = new String(buffer, "UTF-8");;
+                    String received = new String(buffer, "ASCII");
                     Character key = Character.toLowerCase((char) received.charAt(1));
 
                     // Movement keywords
