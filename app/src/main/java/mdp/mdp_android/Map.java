@@ -27,11 +27,8 @@ public class Map {
         }
     }
 
-    public void setObstacle(int x1, int x2, int y1, int y2) {
-        mapData[x1][y1] = -1;
-        mapData[x2][y2] = -1;
-        mapData[x1][y2] = -1;
-        mapData[x2][y1] = -1;
+    public void setObstacle(int x, int y) {
+        mapData[x][y] = -1;
     }
 
     public void setDiscovered(int x, int y) {
