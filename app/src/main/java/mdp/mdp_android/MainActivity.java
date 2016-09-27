@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -60,10 +61,16 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton mRightButton;
     private ImageButton mBackButton;
     private ImageButton settingsbutton2;
+    private ImageButton settingsbutton;
     private Button f1Button;
     private Button f2Button;
     private Button startButton;
     private EditText mStatus;
+
+    public boolean tiltMode= false;
+    private float ref_tilt = 0;
+    private boolean startup_tilt = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +122,40 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         });
-        
+        settingsbutton = (ImageButton) findViewById(R.id.settingsButton);
+        settingsbutton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup2 = new PopupMenu(MainActivity.this, settingsbutton);
+                popup2.getMenuInflater().inflate(R.menu.popup_menu2, popup2.getMenu());
+                popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
+                    public boolean onMenuItemClick(MenuItem item){
+                        switch (item.getItemId()){
+                            case R.id.tiltmode:
+                                /* tilt mode */
+                                if (tiltMode) {
+                                    Toast.makeText(getApplicationContext(), R.string.Tilt_Off,
+                                            Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.Tilt_On,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+
+                                tiltMode = !tiltMode; //Toggle the tilt mode settings.
+
+                                invalidateOptionsMenu();
+                                return true;
+                            case R.id.joystick:
+                                /* joystick codes */
+                                return true;
+                            default:
+                                return true;
+                        }
+                    }
+                });
+                popup2.show();
+            }
+        });
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
 
