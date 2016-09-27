@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.view.MenuItem;
@@ -59,8 +60,10 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton mRightButton;
     private ImageButton mBackButton;
     private ImageButton settingsbutton2;
-    private Button f1button;
-    private Button f2button;
+    private Button f1Button;
+    private Button f2Button;
+    private Button startButton;
+    private EditText mStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,24 +77,24 @@ public class MainActivity extends ActionBarActivity {
         }
         sharedPreferences = getSharedPreferences("UserConfiguration",
                 MODE_PRIVATE);
-        f1button = (Button) findViewById(R.id.f1button);
-        f2button = (Button) findViewById(R.id.f2button);
+        f1Button = (Button) findViewById(R.id.f1button);
+        f2Button = (Button) findViewById(R.id.f2button);
 
-        f1button.setOnClickListener(new OnClickListener() {
+        f1Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 String f1 = sharedPreferences.getString("f1", "");
-                if (bluetooth != null){
+                if (bluetooth != null) {
                     bluetooth.write(f1.getBytes());
                 }
             }
         });
 
-        f2button.setOnClickListener(new OnClickListener() {
+        f2Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 String f2 = sharedPreferences.getString("f2", "");
-                if (bluetooth != null){
+                if (bluetooth != null) {
                     bluetooth.write(f2.getBytes());
                 }
             }
@@ -150,6 +153,18 @@ public class MainActivity extends ActionBarActivity {
             }
         });//closing the setOnClickListener method
 
+        startButton = (Button) findViewById(R.id.startbutton);
+        startButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (bluetooth != null) {
+                    bluetooth.write("ps".getBytes());
+                }
+            }
+        });
+
+        mStatus = (EditText) findViewById(R.id.status);
+
         getSavedConfiguration();
         setupMap();
 
@@ -165,7 +180,7 @@ public class MainActivity extends ActionBarActivity {
         mForwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "pf";
+                String message = "hf";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -180,13 +195,14 @@ public class MainActivity extends ActionBarActivity {
                 mapGrid.removeAllViewsInLayout();
                 mapGrid.addView(mapView);
                 mapGrid.invalidate();
+                mStatus.setText("Move Forward");
             }
         });
 
         mLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "pl";
+                String message = "hl";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -201,13 +217,14 @@ public class MainActivity extends ActionBarActivity {
                 mapGrid.removeAllViewsInLayout();
                 mapGrid.addView(mapView);
                 mapGrid.invalidate();
+                mStatus.setText("Turn Left");
             }
         });
 
         mRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = "pr";
+                String message = "hr";
                 if (bluetooth != null) {
                     bluetooth.write(message.getBytes());
                 }
@@ -222,6 +239,7 @@ public class MainActivity extends ActionBarActivity {
                 mapGrid.removeAllViewsInLayout();
                 mapGrid.addView(mapView);
                 mapGrid.invalidate();
+                mStatus.setText("Turn Right");
             }
         });
 
@@ -243,6 +261,7 @@ public class MainActivity extends ActionBarActivity {
                 mapGrid.removeAllViewsInLayout();
                 mapGrid.addView(mapView);
                 mapGrid.invalidate();
+                mStatus.setText("Move Bakcward");
             }
         });
     }
@@ -336,6 +355,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
                         mapView.invalidate();
+                        mStatus.setText("Move Forward");
                     } else if (received.charAt(0) == 'b') {
                         robot.moveBackward();
                         map = robot.discoverSurrounding();
@@ -344,6 +364,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
                         mapView.invalidate();
+                        mStatus.setText("Move Backward");
                     } else if (received.charAt(0) == 'l') {
                         robot.turnLeft();
                         map = robot.discoverSurrounding();
@@ -352,6 +373,7 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
                         mapView.invalidate();
+                        mStatus.setText("Turn Left");
                     } else if (received.charAt(0) == 'r') {
                         robot.turnRight();
                         map = robot.discoverSurrounding();
@@ -360,11 +382,96 @@ public class MainActivity extends ActionBarActivity {
                         mapView.setDirection(robot.getDirection());
                         mapView.updatePainted(map.getMapData());
                         mapView.invalidate();
+                        mStatus.setText("Turn Right");
                     }
                     break;
                 case OBSTACLE_UPDATE:
-                    String sensor = (String) msg.obj;
-
+                    String message = (String) msg.obj;
+                    int obstacleX, obstacleY;
+                    int[] sensor = new int[5];
+                    for (int i=0; i<5; i++) {
+                        sensor[i] = Integer.parseInt(message.substring(i, i+1));
+                    }
+                    if (sensor[0] > 0 && sensor[0] < 4) {
+                        if (robot.getDirection() == Robot.UP) {
+                            obstacleX = robot.getCurrentX() - 1;
+                            obstacleY = robot.getCurrentY() + sensor[0];
+                        } else if (robot.getDirection() == Robot.DOWN) {
+                            obstacleX = robot.getCurrentX() + 1;
+                            obstacleY = robot.getCurrentY() - sensor[0];
+                        } else if (robot.getDirection() == Robot.LEFT) {
+                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleY = robot.getCurrentY() - 1;
+                        } else {
+                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleY = robot.getCurrentY() + 1;
+                        }
+                        map.setDiscovered(obstacleX, obstacleY);
+                    }
+                    if (sensor[1] > 0 && sensor[1] < 4) {
+                        if (robot.getDirection() == Robot.UP) {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() + sensor[0];
+                        } else if (robot.getDirection() == Robot.DOWN) {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() - sensor[0];
+                        } else if (robot.getDirection() == Robot.LEFT) {
+                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        } else {
+                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        }
+                        map.setObstacle(obstacleX, obstacleY);
+                    }
+                    if (sensor[2] > 0 && sensor[2] < 4) {
+                        if (robot.getDirection() == Robot.UP) {
+                            obstacleX = robot.getCurrentX() + 1;
+                            obstacleY = robot.getCurrentY() + sensor[0];
+                        } else if (robot.getDirection() == Robot.DOWN) {
+                            obstacleX = robot.getCurrentX() - 1;
+                            obstacleY = robot.getCurrentY() - sensor[0];
+                        } else if (robot.getDirection() == Robot.LEFT) {
+                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleY = robot.getCurrentY() + 1;
+                        } else {
+                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleY = robot.getCurrentY() - 1;
+                        }
+                        map.setObstacle(obstacleX, obstacleY);
+                    }
+                    if (sensor[3] > 0 && sensor[3] < 4) {
+                        if (robot.getDirection() == Robot.UP) {
+                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        } else if (robot.getDirection() == Robot.DOWN) {
+                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        } else if (robot.getDirection() == Robot.LEFT) {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() - sensor[0];
+                        } else {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() + sensor[0];
+                        }
+                        map.setObstacle(obstacleX, obstacleY);
+                    }
+                    if (sensor[4] > 0 && sensor[4] < 4) {
+                        if (robot.getDirection() == Robot.UP) {
+                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        } else if (robot.getDirection() == Robot.DOWN) {
+                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleY = robot.getCurrentY();
+                        } else if (robot.getDirection() == Robot.LEFT) {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() + sensor[0];
+                        } else {
+                            obstacleX = robot.getCurrentX();
+                            obstacleY = robot.getCurrentY() - sensor[0];
+                        }
+                        map.setObstacle(obstacleX, obstacleY);
+                    }
 
                     //mapView.updatePainted(map);
                     break;
