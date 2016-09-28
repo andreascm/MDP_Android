@@ -32,16 +32,16 @@ public class UpdateStartCoordinates extends ActionBarActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String xpos = edittextxpos.getText().toString();
-                String ypos = edittextypos.getText().toString();
+                int xpos = Integer.parseInt(edittextxpos.getText().toString());
+                int ypos = Integer.parseInt(edittextypos.getText().toString());
 
                 SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString("xpos", xpos);
-                editor.putString("ypos", ypos);
+                editor.putInt("xpos", xpos);
+                editor.putInt("ypos", ypos);
                 editor.apply();
                 if (bluetooth != null) {
-                    bluetooth.write(("px" + xpos).getBytes());
-                    bluetooth.write(("py" + ypos).getBytes());
+                    bluetooth.write(("px" + String.valueOf(xpos)).getBytes());
+                    bluetooth.write(("py" + String.valueOf(ypos)).getBytes());
                 }
                 setResult(Activity.RESULT_OK);
                 finish();
@@ -51,8 +51,8 @@ public class UpdateStartCoordinates extends ActionBarActivity {
 
     private void loadConfig() {
 
-        edittextxpos.setText(mSharedPreferences.getString("xpos", ""));
-        edittextypos.setText(mSharedPreferences.getString("ypos", ""));
+        edittextxpos.setText(String.valueOf(mSharedPreferences.getInt("xpos", 1)));
+        edittextypos.setText(String.valueOf(mSharedPreferences.getInt("ypos", 1)));
 
     }
 }

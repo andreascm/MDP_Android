@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -24,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View.OnClickListener;
 import android.widget.PopupMenu;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 public class MainActivity extends ActionBarActivity implements SensorEventListener {
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -35,6 +37,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     public static final int OBSTACLE_UPDATE = 7;
     public static final int DISPLAY_MOVEMENT_AND_STATUS = 8;
     public static final int STATUS_UPDATE = 9;
+    public static final int GRID_UPDATE = 10;
 
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
@@ -57,7 +60,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private Robot robot;
     private MapView mapView;
     private Joystick joystick;
-    private View view;
     private LinearLayout mapGrid;
     private LinearLayout joystickLayout;
 
@@ -70,6 +72,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private ImageButton mBackButton;
     private ImageButton settingsbutton2;
     private ImageButton settingsbutton;
+    private ToggleButton autoButton;
+    private Button updateButton;
     private Button f1Button;
     private Button f2Button;
     private Button startButton;
@@ -77,11 +81,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
     private boolean tiltMode= false;
     private boolean joystickMode = false;
-    private float ref_tilt = 0;
-    private boolean startup_tilt = true;
     private int pre_state = 0;
-    public static String f1 = "";
-    public static String f2 = "";
+    private String f1;
+    private String f2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,11 +95,16 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             deviceAddress = savedInstanceState.getString("deviceAddress");
             deviceName = savedInstanceState.getString("deviceName");
         }
+
         sharedPreferences = getSharedPreferences("UserConfiguration", MODE_PRIVATE);
+
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
+
+        f1 = sharedPreferences.getString("f1", "");
+        f2 = sharedPreferences.getString("f2", "");
 
         f1Button = (Button) findViewById(R.id.f1button);
         f2Button = (Button) findViewById(R.id.f2button);
@@ -105,11 +112,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         f1Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("f1", "click");
-                Log.i("f1", f1);
-                if (f1 == "") {
-                    Log.i("f1", "null");
-                }
                 if (bluetooth != null) {
                     bluetooth.write(f1.getBytes());
                 }
@@ -119,11 +121,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         f2Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("f2", "click");
-                Log.i("f2", f2);
-                if (f2 == "") {
-                    Log.i("f2", "null");
-                }
                 if (bluetooth != null) {
                     bluetooth.write(f2.getBytes());
                 }
@@ -137,12 +134,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         mBluetoothButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (bluetoothAdapter.isEnabled()) {
-                    setupBluetoothConnection();
-                } else {
-                    Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
-                }
+                Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBluetooth, REQUEST_ENABLE_BT);
+                setupBluetoothConnection();
             }
         });
         settingsbutton = (ImageButton) findViewById(R.id.settingsButton);
@@ -151,9 +145,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public void onClick(View v) {
                 PopupMenu popup2 = new PopupMenu(MainActivity.this, settingsbutton);
                 popup2.getMenuInflater().inflate(R.menu.popup_menu2, popup2.getMenu());
-                popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
-                    public boolean onMenuItemClick(MenuItem item){
-                        switch (item.getItemId()){
+                popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
                             case R.id.tiltmode:
                                 /* tilt mode */
                                 if (tiltMode) {
@@ -162,6 +156,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                                 } else {
                                     Toast.makeText(getApplicationContext(), R.string.Tilt_On,
                                             Toast.LENGTH_SHORT).show();
+                                    joystickMode = false;
+                                    joystickLayout.removeAllViewsInLayout();
+                                    joystickLayout.setVisibility(View.GONE);
+                                    joystickLayout.invalidate();
                                 }
 
                                 tiltMode = !tiltMode; //Toggle the tilt mode settings.
@@ -179,6 +177,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                                 } else {
                                     Toast.makeText(getApplicationContext(), R.string.Joystick_On,
                                             Toast.LENGTH_SHORT).show();
+                                    tiltMode = false;
                                     joystickLayout.addView(joystick);
                                     joystickLayout.setVisibility(View.VISIBLE);
                                     joystickLayout.invalidate();
@@ -196,6 +195,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 popup2.show();
             }
         });
+
         settingsbutton2 = (ImageButton) findViewById(R.id.settingsButton2);
         settingsbutton2.setOnClickListener(new OnClickListener() {
 
@@ -233,12 +233,31 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             }
         });//closing the setOnClickListener method
 
+        autoButton = (ToggleButton) findViewById(R.id.autoButton);
+        autoButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                autoMode = !isChecked;
+            }
+        });
+
+        updateButton = (Button) findViewById(R.id.updatebutton);
+        updateButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapView.invalidate();
+                mapGrid.removeAllViewsInLayout();
+                mapGrid.addView(mapView);
+                mapGrid.invalidate();
+            }
+        });
+
         startButton = (Button) findViewById(R.id.startbutton);
         startButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (bluetooth != null) {
-                    bluetooth.write("ps".getBytes());
+                    bluetooth.write("s".getBytes());
                 }
             }
         });
@@ -331,7 +350,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     }
                 }
             }
-        }, 500);
+        }, 350);
         joystickLayout = (LinearLayout) findViewById(R.id.joystickLayout);
 
         mForwardButton = (ImageButton) findViewById(R.id.arrowUp);
@@ -352,11 +371,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
-                mStatus.setText("Move Forward");
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                    mStatus.setText("Move Forward");
+                }
             }
         });
 
@@ -373,11 +394,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
-                mStatus.setText("Turn Left");
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                    mStatus.setText("Turn Left");
+                }
             }
         });
 
@@ -394,11 +417,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
-                mStatus.setText("Turn Right");
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                    mStatus.setText("Turn Right");
+                }
             }
         });
 
@@ -415,11 +440,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 mapView.setCurrentY(robot.getCurrentY());
                 mapView.setDirection(robot.getDirection());
                 mapView.updatePainted(map.getMapData());
-                mapView.invalidate();
-                mapGrid.removeAllViewsInLayout();
-                mapGrid.addView(mapView);
-                mapGrid.invalidate();
-                mStatus.setText("Move Bakcward");
+                if (autoMode) {
+                    mapView.invalidate();
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
+                    mStatus.setText("Move Bakcward");
+                }
             }
         });
     }
@@ -484,6 +511,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     // save the connected device's name
                     deviceName = msg.getData().getString(
                             Bluetooth.DEVICE_NAME);
+                    Toast.makeText(MainActivity.this, "Connected to " + deviceName, Toast.LENGTH_SHORT).show();
                     break;
 
                 case MESSAGE_BLUETOOTH_DISCONNECT:
@@ -504,7 +532,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     break;
                 case DISPLAY_MOVEMENT_AND_STATUS:
                     String received = (String) msg.obj;
-                    Log.i("receive", received);
                     if (received.charAt(0) == 'f') {
                         robot.moveForward();
                         map = robot.discoverSurrounding();
@@ -541,14 +568,26 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         mapView.updatePainted(map.getMapData());
                         mapView.invalidate();
                         mStatus.setText("Turn Right");
+                    } else if (Character.isDigit(received.charAt(0))) {
+                        int numStep = Integer.parseInt(received.substring(0, 1));
+                        for (int i=0; i<numStep; i++) {
+                            robot.moveForward();
+                            map = robot.discoverSurrounding();
+                        }
+                        mapView.setCurrentX(robot.getCurrentX());
+                        mapView.setCurrentY(robot.getCurrentY());
+                        mapView.setDirection(robot.getDirection());
+                        mapView.updatePainted(map.getMapData());
+                        mapView.invalidate();
+                        mStatus.setText("Move Forward");
                     }
                     break;
                 case OBSTACLE_UPDATE:
-                    String message = (String) msg.obj;
+                    String update = (String) msg.obj;
                     int obstacleX, obstacleY;
                     int[] sensor = new int[5];
                     for (int i=0; i<5; i++) {
-                        sensor[i] = Integer.parseInt(message.substring(i, i+1));
+                        sensor[i] = Integer.parseInt(update.substring(i, i+1));
                     }
                     if (sensor[0] > 0 && sensor[0] < 4) {
                         if (robot.getDirection() == Robot.UP) {
@@ -633,6 +672,66 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
                     //mapView.updatePainted(map);
                     break;
+                case GRID_UPDATE:
+                    String grid = (String) msg.obj;
+
+                    int[] gridInt = new int[75];
+                    int[] gridArray = new int[300];
+
+                    for (int i=0; i<75; i++) {
+                        if (Character.isDigit(grid.charAt(i))) {
+                            gridInt[i] = Integer.parseInt(grid.substring(i, i + 1));
+                        } else {
+                            String temp = grid.substring(i, i+1);
+                            switch (temp) {
+                                case "a":
+                                    gridInt[i] = 10;
+                                    break;
+                                case "b":
+                                    gridInt[i] = 11;
+                                    break;
+                                case "c":
+                                    gridInt[i] = 12;
+                                    break;
+                                case "d":
+                                    gridInt[i] = 13;
+                                    break;
+                                case "e":
+                                    gridInt[i] = 14;
+                                    break;
+                                case "f":
+                                    gridInt[i] = 15;
+                                    break;
+                            }
+                        }
+                    }
+
+                    for (int i=0; i<300; i++) {
+                        String temp = String.format("%4s", Integer.toBinaryString(gridInt[(int) (i/4)])).replace(' ', '0');
+                        Log.i("gridArray " + i/4, String.valueOf(gridInt[(int) (i/4)]));
+                        Log.i("temp " + i, temp);
+                        gridArray[i] = Integer.parseInt(temp.substring(i%4, (i%4)+1));
+                    }
+
+                    for (int j=0; j<20; j++) {
+                        for (int i=0; i<15; i++) {
+                            if (gridArray[j*15+i] == 1) {
+                                map.setObstacle(i, 19-j);
+                            }
+                        }
+                    }
+
+                    mapView.updatePainted(map.getMapData());
+                    if (autoMode) {
+                        mapGrid.removeAllViewsInLayout();
+                        mapGrid.addView(mapView);
+                        mapGrid.invalidate();
+                    }
+
+                default:
+                    String message = (String) msg.obj;
+                    Log.i("message", message);
+                    break;
                 case -1:
                     break;
             }
@@ -699,12 +798,23 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
             case UPDATE_START:
                 if (resultCode == Activity.RESULT_OK) {
-                    robot.setRobot(sharedPreferences.getInt("xpos", 1), sharedPreferences.getInt("ypos", 1));
+
+                    map = new Map(0, 0);
+                    map.resetMap();
+
+                    robot = new Robot(map, sharedPreferences.getInt("xpos", 1), sharedPreferences.getInt("ypos", 1), Robot.UP);
+                    map = robot.discoverSurrounding();
+
+                    mapView = new MapView(this, map.getMapData(), robot.getCurrentX(), robot.getCurrentY(), robot.getDirection());
+                    mapGrid.removeAllViewsInLayout();
+                    mapGrid.addView(mapView);
+                    mapGrid.invalidate();
                 }
                 break;
 
             case UPDATE_CONFIG:
                 if (resultCode == Activity.RESULT_OK) {
+
                     f1 = sharedPreferences.getString("f1", "");
                     f2 = sharedPreferences.getString("f2", "");
                 }
@@ -719,13 +829,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
         robot = new Robot(map, 1, 1, Robot.UP);
         map = robot.discoverSurrounding();
-
-        for (int i=0; i<15; i++) {
-            for (int j=0; j<20; j++) {
-                if (map.getMapData()[i][j] == 1) {
-                }
-            }
-        }
 
         mapView = new MapView(this, map.getMapData(), robot.getCurrentX(), robot.getCurrentY(), robot.getDirection());
         mapView.invalidate();
@@ -769,11 +872,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
             if (tiltMode) {
 
-                if (startup_tilt) {
-                    ref_tilt = y;//Capture the 1st y-axis tilt to offset.
-                    startup_tilt = false;
-                }
-
                 if (x < -1) {
                     //When x is negative value, it is tilting towards RIGHT.
                     if (x > -4) {
@@ -799,7 +897,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             tiltTurnLeft();
                         }
                     }
-                } else if (y > 3 + ref_tilt) {
+                } else if (y > 3) {
                     //If y is more than 3 of first held offset, it is expected to reverse.
                     pre_state = 0;
                     String message = "hb";
@@ -809,7 +907,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     if (autoMode) {
                         robot.moveBackward();
                     }
-                } else if (y < -0.5 + ref_tilt) {
+                } else if (y < -0.1) {
                     //Robots moves at a very slight of tilting forward.
                     pre_state = 0;
                     String message = "hf";
