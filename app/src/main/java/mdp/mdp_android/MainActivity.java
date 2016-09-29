@@ -38,6 +38,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
+    private static final int UPDATE_START = 3;
+    private static final int UPDATE_CONFIG = 4;
 
     private String deviceName = null;
     private ArrayAdapter<String> messageArrayAdapter;
@@ -78,6 +80,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     private float ref_tilt = 0;
     private boolean startup_tilt = true;
     private int pre_state = 0;
+    public static String f1 = "";
+    public static String f2 = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,10 +93,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             deviceAddress = savedInstanceState.getString("deviceAddress");
             deviceName = savedInstanceState.getString("deviceName");
         }
-        sharedPreferences = getSharedPreferences("UserConfiguration",
-                MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("UserConfiguration", MODE_PRIVATE);
         SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        // add listener. The listener will be HelloAndroid (this) class
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
@@ -103,7 +105,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         f1Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String f1 = sharedPreferences.getString("f1", "");
+                Log.i("f1", "click");
+                Log.i("f1", f1);
+                if (f1 == "") {
+                    Log.i("f1", "null");
+                }
                 if (bluetooth != null) {
                     bluetooth.write(f1.getBytes());
                 }
@@ -113,7 +119,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         f2Button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String f2 = sharedPreferences.getString("f2", "");
+                Log.i("f2", "click");
+                Log.i("f2", f2);
+                if (f2 == "") {
+                    Log.i("f2", "null");
+                }
                 if (bluetooth != null) {
                     bluetooth.write(f2.getBytes());
                 }
@@ -206,11 +216,11 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                                 return true;
                             case R.id.startcoordinates:
                                 Intent intent2 = new Intent(MainActivity.this, UpdateStartCoordinates.class);
-                                startActivity(intent2);
+                                startActivityForResult(intent2, UPDATE_START);
                                 return true;
                             case R.id.reconfigure:
                                 Intent intent3 = new Intent(MainActivity.this, ReconfigureButtons.class);
-                                startActivity(intent3);
+                                startActivityForResult(intent3, UPDATE_CONFIG);
                                 return true;
                             default:
                                 return true;
@@ -235,7 +245,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
         mStatus = (EditText) findViewById(R.id.status);
 
-        getSavedConfiguration();
         setupMap();
 
         mapGrid = (LinearLayout) findViewById(R.id.mapGrid);
@@ -246,8 +255,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         joystick.setOnJoystickMoveListener(new Joystick.OnJoystickMoveListener() {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
-                Log.i("direction", String.valueOf(direction));
-                Log.e("angle", String.valueOf(angle));
                 if (power > 90) {
                     if (direction == Joystick.UP) {
                         String message = "hf";
@@ -689,11 +696,20 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                 } else {
                 }
                 break;
-        }
-    }
 
-    private void getSavedConfiguration() {
-        sharedPreferences = getSharedPreferences("SavedConfiguration", MODE_PRIVATE);
+            case UPDATE_START:
+                if (resultCode == Activity.RESULT_OK) {
+                    robot.setRobot(sharedPreferences.getInt("xpos", 1), sharedPreferences.getInt("ypos", 1));
+                }
+                break;
+
+            case UPDATE_CONFIG:
+                if (resultCode == Activity.RESULT_OK) {
+                    f1 = sharedPreferences.getString("f1", "");
+                    f2 = sharedPreferences.getString("f2", "");
+                }
+                break;
+        }
     }
 
     private void setupMap() {
@@ -701,7 +717,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         map = new Map(0, 0);
         map.resetMap();
 
-        robot = new Robot(map, 1, 1, Robot.RIGHT);
+        robot = new Robot(map, 1, 1, Robot.UP);
         map = robot.discoverSurrounding();
 
         for (int i=0; i<15; i++) {

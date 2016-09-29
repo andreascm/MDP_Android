@@ -1,5 +1,6 @@
 package mdp.mdp_android;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -42,7 +43,7 @@ public class UpdateStartCoordinates extends ActionBarActivity {
                     bluetooth.write(("px" + xpos).getBytes());
                     bluetooth.write(("py" + ypos).getBytes());
                 }
-
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });

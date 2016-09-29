@@ -3,6 +3,7 @@ package mdp.mdp_android;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,8 +24,7 @@ public class ReconfigureButtons extends ActionBarActivity {
 
         saveButton = (Button) findViewById(R.id.reconfigureSavebutton);
 
-        mSharedPreferences = getSharedPreferences("UserConfiguration",
-                MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences("UserConfiguration", MODE_PRIVATE);
 
         loadConfig();
 
@@ -38,6 +38,8 @@ public class ReconfigureButtons extends ActionBarActivity {
                 editor.putString("f1", f1);
                 editor.putString("f2", f2);
                 editor.apply();
+                MainActivity.f1 = mSharedPreferences.getString("f1", "");
+                MainActivity.f2 = mSharedPreferences.getString("f2", "");
                 finish();
             }
         });
