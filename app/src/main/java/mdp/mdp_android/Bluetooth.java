@@ -259,19 +259,19 @@ public class Bluetooth {
                     bytes = inputStream.read(buffer);
                     String received = new String(buffer, 0, bytes);
 
-                    Log.i("buffer", new String(buffer, 0, bytes));
+                    Log.i("received", received);
 
-                    Character key = Character.toLowerCase((char) received.charAt(1));
+                    Character key = Character.toLowerCase((char) received.charAt(0));
 
                     // Movement keywords
                     // Deciphers input and sends it to initiate robot movements
-                    if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f')) {
+                    if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f') || Character.isDigit(key)) {
 
                         // Displays feedback from robot returns after pressing
                         // keywords
                         handler.obtainMessage(
                                 MainActivity.DISPLAY_MOVEMENT_AND_STATUS,
-                                bytes, -1, received).sendToTarget();
+                                bytes, -1, received.substring(0)).sendToTarget();
 
                         // Reset grid
                         // Redisplay information of grid
@@ -287,19 +287,17 @@ public class Bluetooth {
 
                         // Displays feedback from robot returns after pressing keywords
                         handler.obtainMessage(MainActivity.STATUS_UPDATE, bytes,
-                                -1, received).sendToTarget();
+                                -1, received.substring(0)).sendToTarget();
 
                         buffer = new byte[1024];
+                    } else if (received.contains("grid")) {
+                        handler.obtainMessage(MainActivity.GRID_UPDATE, bytes, -1, received.substring(11, 86)).sendToTarget();
                     } else {
                         //Other random info, most likely a result from debug tools testing bluetooth connection.
-                        handler.obtainMessage(MainActivity.STATUS_UPDATE,bytes,
-                                -1, received).sendToTarget();
                         handler.obtainMessage(BluetoothTesting.RECEIVE_MESSAGE,bytes,
                                 -1, received).sendToTarget();
                         buffer = new byte[1024];
                     }
-
-                    Log.i("Received data", received);
                 } catch (IOException e) {
                     connectionLost(); //To sort reason of disconnection later.
                     break;
