@@ -603,7 +603,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             obstacleX = robot.getCurrentX() + sensor[0];
                             obstacleY = robot.getCurrentY() + 1;
                         }
-                        map.setDiscovered(obstacleX, obstacleY);
+                        map.setObstacle(obstacleX, obstacleY);
                     }
                     if (sensor[1] > 0 && sensor[1] < 4) {
                         if (robot.getDirection() == Robot.UP) {
@@ -670,7 +670,14 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                         map.setObstacle(obstacleX, obstacleY);
                     }
 
-                    //mapView.updatePainted(map);
+                    mapView.updatePainted(map.getMapData());
+
+                    if (autoMode) {
+                        mapView.invalidate();
+                        mapGrid.removeAllViewsInLayout();
+                        mapGrid.addView(mapView);
+                        mapGrid.invalidate();
+                    }
                     break;
                 case GRID_UPDATE:
                     String grid = (String) msg.obj;
