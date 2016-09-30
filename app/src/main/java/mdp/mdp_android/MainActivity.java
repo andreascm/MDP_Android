@@ -9,8 +9,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -258,6 +260,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             public void onClick(View v) {
                 if (bluetooth != null) {
                     bluetooth.write("s".getBytes());
+                    mStatus.setText("Start");
                 }
             }
         });
@@ -310,7 +313,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                             mapGrid.addView(mapView);
                             mapGrid.invalidate();
                         }
-                        mStatus.setText("Move Bakcward");
+                        mStatus.setText("Move Backward");
                     } else if (direction == Joystick.LEFT) {
                         String message = "hl";
                         if (bluetooth != null) {
@@ -445,7 +448,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     mapGrid.removeAllViewsInLayout();
                     mapGrid.addView(mapView);
                     mapGrid.invalidate();
-                    mStatus.setText("Move Bakcward");
+                    mStatus.setText("Move Backward");
                 }
             }
         });
@@ -532,142 +535,186 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
                     break;
                 case DISPLAY_MOVEMENT_AND_STATUS:
                     String received = (String) msg.obj;
-                    if (received.charAt(0) == 'f') {
-                        robot.moveForward();
-                        map = robot.discoverSurrounding();
-                        mapView.setCurrentX(robot.getCurrentX());
-                        mapView.setCurrentY(robot.getCurrentY());
-                        mapView.setDirection(robot.getDirection());
-                        mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
-                        mStatus.setText("Move Forward");
-                    } else if (received.charAt(0) == 'b') {
-                        robot.moveBackward();
-                        map = robot.discoverSurrounding();
-                        mapView.setCurrentX(robot.getCurrentX());
-                        mapView.setCurrentY(robot.getCurrentY());
-                        mapView.setDirection(robot.getDirection());
-                        mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
-                        mStatus.setText("Move Backward");
-                    } else if (received.charAt(0) == 'l') {
-                        robot.turnLeft();
-                        map = robot.discoverSurrounding();
-                        mapView.setCurrentX(robot.getCurrentX());
-                        mapView.setCurrentY(robot.getCurrentY());
-                        mapView.setDirection(robot.getDirection());
-                        mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
-                        mStatus.setText("Turn Left");
-                    } else if (received.charAt(0) == 'r') {
-                        robot.turnRight();
-                        map = robot.discoverSurrounding();
-                        mapView.setCurrentX(robot.getCurrentX());
-                        mapView.setCurrentY(robot.getCurrentY());
-                        mapView.setDirection(robot.getDirection());
-                        mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
-                        mStatus.setText("Turn Right");
-                    } else if (Character.isDigit(received.charAt(0))) {
-                        int numStep = Integer.parseInt(received.substring(0, 1));
-                        for (int i=0; i<numStep; i++) {
+
+                    Log.i("received", received);
+                    for (int i=0; i<received.length(); i++) {
+                        if (Character.isDigit(received.charAt(i))) {
+                            String temp = "";
+                            for (int j=0; j<Integer.parseInt(received.substring(i, i+1)); j++) {
+                                temp += "1";
+                            }
+                            received.replace(received.substring(i, i+1), temp);
+                        }
+                    }
+                    Log.i("received", received);
+
+                    for (int i=0; i<received.length(); i++) {
+                        if (received.charAt(i) == '1') {
                             robot.moveForward();
                             map = robot.discoverSurrounding();
+                            mStatus.setText("Move Forward");
+                            mapView.setCurrentX(robot.getCurrentX());
+                            mapView.setCurrentY(robot.getCurrentY());
+                            mapView.setDirection(robot.getDirection());
+                            mapView.updatePainted(map.getMapData());
+                            mapView.invalidate();
+                        } else if (Character.isDigit(received.charAt(i))) {
+                            int numStep = Integer.parseInt(received.substring(i, i + 1));
+                            for (int j = 0; j < numStep; j++) {
+                                robot.moveForward();
+                                map = robot.discoverSurrounding();
+                                mStatus.setText("Move Forward");
+                                mapView.setCurrentX(robot.getCurrentX());
+                                mapView.setCurrentY(robot.getCurrentY());
+                                mapView.setDirection(robot.getDirection());
+                                mapView.updatePainted(map.getMapData());
+                                mapView.invalidate();
+                            }
+                        } else if (received.charAt(i) == 'b') {
+                            robot.moveBackward();
+                            map = robot.discoverSurrounding();
+                            mStatus.setText("Move Backward");
+                            mapView.setCurrentX(robot.getCurrentX());
+                            mapView.setCurrentY(robot.getCurrentY());
+                            mapView.setDirection(robot.getDirection());
+                            mapView.updatePainted(map.getMapData());
+                            mapView.invalidate();
+                        } else if (received.charAt(i) == 'l') {
+                            Log.i("status", "l");
+                            robot.turnLeft();
+                            map = robot.discoverSurrounding();
+                            mStatus.setText("Turn Left");
+                            mapView.setCurrentX(robot.getCurrentX());
+                            mapView.setCurrentY(robot.getCurrentY());
+                            mapView.setDirection(robot.getDirection());
+                            mapView.updatePainted(map.getMapData());
+                            mapView.invalidate();
+                        } else if (received.charAt(i) == 'r') {
+                            Log.i("status", "r");
+                            robot.turnRight();
+                            map = robot.discoverSurrounding();
+                            mStatus.setText("Turn Right");
+                            mapView.setCurrentX(robot.getCurrentX());
+                            mapView.setCurrentY(robot.getCurrentY());
+                            mapView.setDirection(robot.getDirection());
+                            mapView.updatePainted(map.getMapData());
+                            mapView.invalidate();
+                        } else if (received.charAt(i) == 'f') {
+                            Log.i("status", "f");
+                            robot.moveForward();
+                            map = robot.discoverSurrounding();
+                            mStatus.setText("Move Forward");
+                            mapView.setCurrentX(robot.getCurrentX());
+                            mapView.setCurrentY(robot.getCurrentY());
+                            mapView.setDirection(robot.getDirection());
+                            mapView.updatePainted(map.getMapData());
+                            mapView.invalidate();
                         }
-                        mapView.setCurrentX(robot.getCurrentX());
-                        mapView.setCurrentY(robot.getCurrentY());
-                        mapView.setDirection(robot.getDirection());
-                        mapView.updatePainted(map.getMapData());
-                        mapView.invalidate();
-                        mStatus.setText("Move Forward");
                     }
                     break;
                 case OBSTACLE_UPDATE:
                     String update = (String) msg.obj;
+                    Log.i("update", update);
                     int obstacleX, obstacleY;
                     int[] sensor = new int[5];
                     for (int i=0; i<5; i++) {
                         sensor[i] = Integer.parseInt(update.substring(i, i+1));
+                        Log.i("sensor" + i, String.valueOf(sensor[i]));
                     }
                     if (sensor[0] > 0 && sensor[0] < 4) {
+                        Log.i("sensor", "0");
                         if (robot.getDirection() == Robot.UP) {
                             obstacleX = robot.getCurrentX() - 1;
-                            obstacleY = robot.getCurrentY() + sensor[0];
+                            obstacleY = robot.getCurrentY() + sensor[0] + 1;
                         } else if (robot.getDirection() == Robot.DOWN) {
                             obstacleX = robot.getCurrentX() + 1;
-                            obstacleY = robot.getCurrentY() - sensor[0];
+                            obstacleY = robot.getCurrentY() - sensor[0] - 1;
                         } else if (robot.getDirection() == Robot.LEFT) {
-                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleX = robot.getCurrentX() - sensor[0] - 1;
                             obstacleY = robot.getCurrentY() - 1;
                         } else {
-                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleX = robot.getCurrentX() + sensor[0] + 1;
                             obstacleY = robot.getCurrentY() + 1;
                         }
-                        map.setObstacle(obstacleX, obstacleY);
+                        if (obstacleX > -1 && obstacleX < map.getMapWidth() && obstacleY > -1 && obstacleY < map.getMapLength()) {
+                            map.setObstacle(obstacleX, obstacleY);
+                        }
                     }
                     if (sensor[1] > 0 && sensor[1] < 4) {
+                        Log.i("sensor", "1");
                         if (robot.getDirection() == Robot.UP) {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() + sensor[0];
+                            obstacleY = robot.getCurrentY() + sensor[1] + 1;
                         } else if (robot.getDirection() == Robot.DOWN) {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() - sensor[0];
+                            obstacleY = robot.getCurrentY() - sensor[1] - 1;
                         } else if (robot.getDirection() == Robot.LEFT) {
-                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleX = robot.getCurrentX() - sensor[1] - 1;
                             obstacleY = robot.getCurrentY();
                         } else {
-                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleX = robot.getCurrentX() + sensor[1] + 1;
                             obstacleY = robot.getCurrentY();
                         }
-                        map.setObstacle(obstacleX, obstacleY);
+                        if (obstacleX > -1 && obstacleX < map.getMapWidth() && obstacleY > -1 && obstacleY < map.getMapLength()) {
+                            map.setObstacle(obstacleX, obstacleY);
+                        }
                     }
                     if (sensor[2] > 0 && sensor[2] < 4) {
+                        Log.i("sensor", "2");
                         if (robot.getDirection() == Robot.UP) {
                             obstacleX = robot.getCurrentX() + 1;
-                            obstacleY = robot.getCurrentY() + sensor[0];
+                            obstacleY = robot.getCurrentY() + sensor[2] + 1;
                         } else if (robot.getDirection() == Robot.DOWN) {
                             obstacleX = robot.getCurrentX() - 1;
-                            obstacleY = robot.getCurrentY() - sensor[0];
+                            obstacleY = robot.getCurrentY() - sensor[2] - 1;
                         } else if (robot.getDirection() == Robot.LEFT) {
-                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleX = robot.getCurrentX() - sensor[2] - 1;
                             obstacleY = robot.getCurrentY() + 1;
                         } else {
-                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleX = robot.getCurrentX() + sensor[2] + 1;
                             obstacleY = robot.getCurrentY() - 1;
                         }
-                        map.setObstacle(obstacleX, obstacleY);
+                        if (obstacleX > -1 && obstacleX < map.getMapWidth() && obstacleY > -1 && obstacleY < map.getMapLength()) {
+                            map.setObstacle(obstacleX, obstacleY);
+                        }
                     }
                     if (sensor[3] > 0 && sensor[3] < 4) {
+                        Log.i("sensor", "3");
                         if (robot.getDirection() == Robot.UP) {
-                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleX = robot.getCurrentX() - sensor[3] - 1;
                             obstacleY = robot.getCurrentY();
                         } else if (robot.getDirection() == Robot.DOWN) {
-                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleX = robot.getCurrentX() + sensor[3] + 1;
                             obstacleY = robot.getCurrentY();
                         } else if (robot.getDirection() == Robot.LEFT) {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() - sensor[0];
+                            obstacleY = robot.getCurrentY() - sensor[3] - 1;
                         } else {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() + sensor[0];
+                            obstacleY = robot.getCurrentY() + sensor[3] + 1;
                         }
-                        map.setObstacle(obstacleX, obstacleY);
+                        if (obstacleX > -1 && obstacleX < map.getMapWidth() && obstacleY > -1 && obstacleY < map.getMapLength()) {
+                            map.setObstacle(obstacleX, obstacleY);
+                        }
                     }
                     if (sensor[4] > 0 && sensor[4] < 4) {
+                        Log.i("sensor", "4");
                         if (robot.getDirection() == Robot.UP) {
-                            obstacleX = robot.getCurrentX() + sensor[0];
+                            obstacleX = robot.getCurrentX() + sensor[4] + 1;
                             obstacleY = robot.getCurrentY();
                         } else if (robot.getDirection() == Robot.DOWN) {
-                            obstacleX = robot.getCurrentX() - sensor[0];
+                            obstacleX = robot.getCurrentX() - sensor[4] - 1;
                             obstacleY = robot.getCurrentY();
                         } else if (robot.getDirection() == Robot.LEFT) {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() + sensor[0];
+                            obstacleY = robot.getCurrentY() + sensor[4] + 1;
                         } else {
                             obstacleX = robot.getCurrentX();
-                            obstacleY = robot.getCurrentY() - sensor[0];
+                            obstacleY = robot.getCurrentY() - sensor[4] - 1;
                         }
-                        map.setObstacle(obstacleX, obstacleY);
+                        if (obstacleX > -1 && obstacleX < map.getMapWidth() && obstacleY > -1 && obstacleY < map.getMapLength()) {
+                            map.setObstacle(obstacleX, obstacleY);
+                        }
                     }
 
                     mapView.updatePainted(map.getMapData());
