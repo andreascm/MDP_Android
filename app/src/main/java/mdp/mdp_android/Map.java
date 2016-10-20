@@ -28,11 +28,18 @@ public class Map {
     }
 
     public void setObstacle(int x, int y) {
-        mapData[x][y] = -1;
+        if ((x > -1 && x < 3 && y > -1 && y < 3) || (x < 15 && x > 11 && y < 15 && y > 11)) {
+
+        } else {
+            mapData[x][y] = -1;
+        }
+
     }
 
     public void setDiscovered(int x, int y) {
-        mapData[x][y] = 1;
+        if (x > -1 && y > -1 && x < mapData.length && y < mapData[x].length) {
+            mapData[x][y] = 1;
+        }
     }
 
     public int getMapLength() {

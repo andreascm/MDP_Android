@@ -30,14 +30,6 @@ public class Robot {
         direction = moveDirection;
     }
 
-    public Map setRobot(int x, int y) {
-        current_x = x;
-        current_y = y;
-        map.setDiscovered(x, y);
-        discoverSurrounding();
-        return map;
-    }
-
     public void moveForward() {
         updatePosition(MOVE_FORWARD);
     }

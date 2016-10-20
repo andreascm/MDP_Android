@@ -259,39 +259,41 @@ public class Bluetooth {
                     bytes = inputStream.read(buffer);
                     String received = new String(buffer, 0, bytes);
 
-                    Log.i("received", received);
+                    Log.i("bluetooth", received);
 
                     Character key = Character.toLowerCase((char) received.charAt(0));
 
-                    // Movement keywords
-                    // Deciphers input and sends it to initiate robot movements
-                    if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f') || Character.isDigit(key)) {
+                    if (received.length() == 1 && received.contains("0")) {
+
+                    } else if ((key == 'b') || (key == 'r') || (key == 'l') || (key == 'f') || Character.isDigit(key)) {
 
                         // Displays feedback from robot returns after pressing
                         // keywords
                         handler.obtainMessage(
                                 MainActivity.DISPLAY_MOVEMENT_AND_STATUS,
                                 bytes, -1, received.substring(0)).sendToTarget();
-
-                        // Reset grid
-                        // Redisplay information of grid
                     } else if (key == 'o') {
 
-                        // Updates grid
-                        handler.obtainMessage(MainActivity.OBSTACLE_UPDATE, bytes,
-                                -1, received.substring(1)).sendToTarget();
+                        // Updates obstacles
+                        if (received.length() == 5) {
+                            handler.obtainMessage(MainActivity.OBSTACLE_UPDATE, bytes,
+                                    -1, received.substring(1)).sendToTarget();
+                        } else if (received.length() > 5) {
+                            handler.obtainMessage(MainActivity.OBSTACLE_UPDATE, bytes,
+                                    -1, received.substring(1, 6)).sendToTarget();
+                            handler.obtainMessage(MainActivity.DISPLAY_MOVEMENT_AND_STATUS, bytes,
+                                     -1, received.substring(6)).sendToTarget();
+                        }
 
                         buffer = new byte[1024];
 
                     } else if (key == 's') {
-
-                        // Displays feedback from robot returns after pressing keywords
                         handler.obtainMessage(MainActivity.STATUS_UPDATE, bytes,
                                 -1, received.substring(0)).sendToTarget();
 
                         buffer = new byte[1024];
-                    } else if (received.contains("grid")) {
-                        handler.obtainMessage(MainActivity.GRID_UPDATE, bytes, -1, received.substring(11, 86)).sendToTarget();
+                    } else if (received.contains("g")) {
+                        handler.obtainMessage(MainActivity.GRID_UPDATE, bytes, -1, received.substring(1)).sendToTarget();
                     } else {
                         //Other random info, most likely a result from debug tools testing bluetooth connection.
                         handler.obtainMessage(BluetoothTesting.RECEIVE_MESSAGE,bytes,
