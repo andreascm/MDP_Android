@@ -14,7 +14,7 @@ import android.view.View;
 /**
  * Created by andreaschrisnamayong on 9/16/16.
  */
-public class MapView extends View {
+public class  MapView extends View {
     private int numColumn;
     private int numRow;
     private int cellWidth;
